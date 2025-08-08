@@ -46,14 +46,14 @@ jobs:
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
           make retina-image \
-            IMAGE_NAMESPACE=${{ github.repository }} \
+            IMAGE_NAMESPACE=${{ github.repository.toLower() }} \
             PLATFORM=${{ matrix.platform }}/${{ matrix.arch }} \
             BUILDX_ACTION=--push
 
       - name: Sign container image
         run: |
           for image in retina-agent retina-init; do
-            IMAGE_PATH="ghcr.io/${{ github.repository }}/$image:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
+            IMAGE_PATH="ghcr.io/${{ github.repository.toLower() }}/$image:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
             DIGEST=$(jq -r '.["containerimage.digest"]' image-metadata-$image-$TAG-${{ matrix.platform }}-${{ matrix.arch }}.json) 
             cosign sign --yes ${IMAGE_PATH}@${DIGEST} 
           done
@@ -92,7 +92,7 @@ jobs:
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
           make retina-image-win \
-            IMAGE_NAMESPACE=${{ github.repository }} \
+            IMAGE_NAMESPACE=${{ github.repository.toLower() }} \
             PLATFORM=${{ matrix.platform }}/${{ matrix.arch }} \
             WINDOWS_YEARS=${{ matrix.year }} \
             BUILDX_ACTION=--push
@@ -100,7 +100,7 @@ jobs:
       - name: Sign container image
         run: |
           for image in retina-agent ; do
-            IMAGE_PATH="ghcr.io/${{ github.repository }}/$image:$TAG-windows-ltsc${{ matrix.year }}-${{ matrix.arch }}"
+            IMAGE_PATH="ghcr.io/${{ github.repository.toLower() }}/$image:$TAG-windows-ltsc${{ matrix.year }}-${{ matrix.arch }}"
             DIGEST=$(jq -r '.["containerimage.digest"]' image-metadata-$image-$TAG-windows-ltsc${{ matrix.year }}-${{ matrix.arch }}.json) 
             cosign sign --yes ${IMAGE_PATH}@${DIGEST}
           done
@@ -138,14 +138,14 @@ jobs:
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
           make retina-operator-image \
-            IMAGE_NAMESPACE=${{ github.repository }} \
+            IMAGE_NAMESPACE=${{ github.repository.toLower() }} \
             PLATFORM=${{ matrix.platform }}/${{ matrix.arch }} \
             BUILDX_ACTION=--push
 
       - name: Sign container image
         run: |
           for image in retina-operator ; do
-              IMAGE_PATH="ghcr.io/${{ github.repository }}/$image:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
+              IMAGE_PATH="ghcr.io/${{ github.repository.toLower() }}/$image:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
               DIGEST=$(jq -r '.["containerimage.digest"]' image-metadata-$image-$TAG-${{ matrix.platform }}-${{ matrix.arch }}.json) 
               cosign sign --yes ${IMAGE_PATH}@${DIGEST} 
           done
@@ -183,13 +183,13 @@ jobs:
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
           make retina-shell-image \
-            IMAGE_NAMESPACE=${{ github.repository }} \
+            IMAGE_NAMESPACE=${{ github.repository.toLower() }} \
             PLATFORM=${{ matrix.platform }}/${{ matrix.arch }} \
             BUILDX_ACTION=--push
 
       - name: Sign container image
         run: |
-          IMAGE_PATH="ghcr.io/${{ github.repository }}/retina-shell:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
+          IMAGE_PATH="ghcr.io/${{ github.repository.toLower() }}/retina-shell:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
           DIGEST=$(jq -r '.["containerimage.digest"]' image-metadata-retina-shell-$TAG-${{ matrix.platform }}-${{ matrix.arch }}.json)
           cosign sign --yes ${IMAGE_PATH}@${DIGEST}
 
@@ -226,13 +226,13 @@ jobs:
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
           make kubectl-retina-image \
-            IMAGE_NAMESPACE=${{ github.repository }} \
+            IMAGE_NAMESPACE=${{ github.repository.toLower() }} \
             PLATFORM=${{ matrix.platform }}/${{ matrix.arch }} \
             BUILDX_ACTION=--push
 
       - name: Sign container image
         run: |
-          IMAGE_PATH="ghcr.io/${{ github.repository }}/kubectl-retina:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
+          IMAGE_PATH="ghcr.io/${{ github.repository.toLower() }}/kubectl-retina:$TAG-${{ matrix.platform }}-${{ matrix.arch }}"
           DIGEST=$(jq -r '.["containerimage.digest"]' image-metadata-kubectl-retina-$TAG-${{ matrix.platform }}-${{ matrix.arch }}.json)
           cosign sign --yes ${IMAGE_PATH}@${DIGEST}
 
@@ -270,7 +270,7 @@ jobs:
         run: |
           set -euo pipefail
           make manifest \
-            IMAGE_NAMESPACE=${{ github.repository }} \
+            IMAGE_NAMESPACE=${{ github.repository.toLower() }} \
             COMPONENT=${{ matrix.component }}
 
       - name: Sign manifest
@@ -285,7 +285,7 @@ jobs:
             images=("kubectl-retina")
           fi
           for image in "${images[@]}"; do
-            IMAGE_PATH="ghcr.io/${{ github.repository }}/$image:$TAG"
+            IMAGE_PATH="ghcr.io/${{ github.repository.toLower() }}/$image:$TAG"
             DIGEST=$(docker buildx imagetools inspect $IMAGE_PATH --format "{{json .Manifest}}" | jq -r .digest)
             cosign sign --yes ${IMAGE_PATH}@${DIGEST} 
           done
