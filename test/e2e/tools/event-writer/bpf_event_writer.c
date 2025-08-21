@@ -279,7 +279,7 @@ event_writer(xdp_md_t* ctx) {
 
 
     
-    if (flt_evttype == PKTMON_NOTIFY_DROP) {
+    if (flt_evttype == CILIUM_NOTIFY_TRACE_SOCK) {
         struct drop_notify* drp_elm;
 
         //Create a Mock Drop Event
