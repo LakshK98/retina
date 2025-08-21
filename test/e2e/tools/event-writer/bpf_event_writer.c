@@ -279,7 +279,7 @@ event_writer(xdp_md_t* ctx) {
 
 
     
-    if (flt_evttype == CILIUM_NOTIFY_TRACE_SOCK) {
+    if (flt_evttype == PKTMON_NOTIFY_DROP) {
         struct drop_notify* drp_elm;
 
         //Create a Mock Drop Event
@@ -291,7 +291,7 @@ event_writer(xdp_md_t* ctx) {
         // create_drop_event(drp_elm);
         // memset(drp_elm->data, 0, sizeof(drp_elm->data));
         // memcpy(drp_elm->data, ctx->data, size_to_copy);
-        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , drp_elm, sizeof(struct drop_notify));
+        // bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , drp_elm, sizeof(struct drop_notify));
     }
 
     update_metrics(size_to_copy, METRIC_INGRESS, reason, 0, 0);
