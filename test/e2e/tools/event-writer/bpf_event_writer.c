@@ -288,7 +288,7 @@ event_writer(xdp_md_t* ctx) {
             return XDP_PASS;
         }
         reason = 130;
-        create_drop_event(drp_elm);
+        // create_drop_event(drp_elm);
         // memset(drp_elm->data, 0, sizeof(drp_elm->data));
         bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d\n", reason, size_to_copy);
         // memcpy(drp_elm->data, ctx->data, size_to_copy);
