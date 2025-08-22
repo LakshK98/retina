@@ -37,7 +37,7 @@ jobs:
 
       - name: Az CLI login
         uses: azure/login@v2
-        if: ${{ (github.event_name == 'merge_group') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev/v0.0.33-windows' && github.repository == 'microsoft/retina')  || (github.event_name == 'workflow_dispatch' &&  github.ref == 'refs/heads/dev/v0.0.33-windows' && github.repository == 'microsoft/retina') }}
+        if: ${{ (github.event_name == 'merge_group') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev/v0.0.33-windows' && github.repository == 'microsoft/retina')  || (github.event_name == 'workflow_dispatch' &&  github.ref == 'refs/heads/laksh/add-pktmon-parsing' && github.repository == 'microsoft/retina') }}
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -63,7 +63,7 @@ jobs:
               PLATFORM=${{ matrix.platform }}/${{ matrix.arch }}
           fi
         env:
-          SHOULD_PUSH_IMAGE: ${{ (github.event_name == 'merge_group') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev/v0.0.33-windows' && github.repository == 'microsoft/retina') || (github.event_name == 'workflow_dispatch' &&  github.ref == 'refs/heads/dev/v0.0.33-windows' && github.repository == 'microsoft/retina') }}
+          SHOULD_PUSH_IMAGE: ${{ (github.event_name == 'merge_group') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev/v0.0.33-windows' && github.repository == 'microsoft/retina') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/laksh/add-pktmon-parsing' && github.repository == 'microsoft/retina') }}
 
   retina-win-images:
     name: Build Agent Windows Images
