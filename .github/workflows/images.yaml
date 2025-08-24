@@ -316,6 +316,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    
+      - name: Set lowercase repo name
+        run: echo "REPO=${{ toLower(github.repository) }}" >> $GITHUB_ENV
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -340,7 +343,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          go test -v ./test/e2e/. -timeout 60m -tags=e2e -count=1  -args -image-tag=$(make version) -image-registry=${{ vars.ACR_NAME }}  -image-namespace=${{ github.repository}}
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          go test -v ./test/e2e/. -timeout 60m -tags=e2e -count=1  -args -image-tag=$(make version) -image-registry=${{ vars.ACR_NAME }}  -image-namespace=$REPO_LOWER
 
   perf-test-basic:
     if: ${{ github.event_name == 'merge_group'}}
@@ -349,7 +353,7 @@ jobs:
     with:
       image-registry: ${{ vars.ACR_NAME }}
       tag: $(make version)
-      image-namespace: ${{ github.repository }}
+      image-namespace: ${{ env.REPO }}
       retina-mode: basic
       azure-location: ${{ vars.AZURE_LOCATION }}
     secrets:
@@ -365,7 +369,7 @@ jobs:
     with:
       image-registry: ${{ vars.ACR_NAME }}
       tag: $(make version)
-      image-namespace: ${{ github.repository }}
+      image-namespace: ${{ env.REPO }}
       retina-mode: advanced
       azure-location: ${{ vars.AZURE_LOCATION }}
     secrets:
