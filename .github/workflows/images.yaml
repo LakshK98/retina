@@ -329,6 +329,7 @@ jobs:
     
       - name: Set lowercase repo name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
@@ -362,7 +363,7 @@ jobs:
     with:
       image-registry: ${{ vars.ACR_NAME }}
       tag: $(make version)
-      image-namespace: ${{ env.REPO }}
+      image-namespace: ${{ github.repository }}
       retina-mode: basic
       azure-location: ${{ vars.AZURE_LOCATION }}
     secrets:
@@ -378,7 +379,7 @@ jobs:
     with:
       image-registry: ${{ vars.ACR_NAME }}
       tag: $(make version)
-      image-namespace: ${{ env.REPO }}
+      image-namespace: ${{ github.repository }}
       retina-mode: advanced
       azure-location: ${{ vars.AZURE_LOCATION }}
     secrets:
