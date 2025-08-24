@@ -197,7 +197,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 	case MessageTypePktmonDrop:
 		dn = &DropNotify{}
 		if err := DecodePktmonDrop(data, dn); err != nil {
-			return fmt.Errorf("failed to parse pktmon drop: %w", err)
+			return fmt.Errorf("failed to parse pktmon drop here: %w", err)
 		}
 
 	default:
