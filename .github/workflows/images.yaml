@@ -51,7 +51,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           if [ "$SHOULD_PUSH_IMAGE" == "true" ]; then
             az acr login -n ${{ vars.ACR_NAME }}
             make retina-image \
@@ -106,7 +105,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           if [ "$SHOULD_PUSH_IMAGE" == "true" ]; then
             az acr login -n ${{ vars.ACR_NAME }} 
             make retina-image-win \
@@ -162,7 +160,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           if [ "$SHOULD_PUSH_IMAGE" == "true" ]; then
             az acr login -n ${{ vars.ACR_NAME }}
             make retina-operator-image \
@@ -216,7 +213,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           if [ "$SHOULD_PUSH_IMAGE" == "true" ]; then
             az acr login -n ${{ vars.ACR_NAME }}
             make retina-shell-image \
@@ -269,7 +265,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "TAG=$(make version)" >> $GITHUB_ENV
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           if [ "$SHOULD_PUSH_IMAGE" == "true" ]; then
             az acr login -n ${{ vars.ACR_NAME }}
             make kubectl-retina-image \
@@ -358,8 +353,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          go test -v ./test/e2e/. -timeout 60m -tags=e2e -count=1  -args -image-tag=$(make version) -image-registry=${{ vars.ACR_NAME }}  -image-namespace=$REPO_LOWER
+          go test -v ./test/e2e/. -timeout 60m -tags=e2e -count=1  -args -image-tag=$(make version) -image-registry=${{ vars.ACR_NAME }}  -image-namespace=${{ env.REPO }}
 
   perf-test-basic:
     if: ${{ github.event_name == 'merge_group'}}
