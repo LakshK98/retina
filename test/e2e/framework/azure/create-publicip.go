@@ -20,7 +20,6 @@ type CreatePublicIp struct {
 }
 
 func (c *CreatePublicIp) Run() error {
-
 	cred, err := azidentity.NewAzureCLICredential(nil)
 	if err != nil {
 		return fmt.Errorf("failed to obtain a credential: %w", err)
