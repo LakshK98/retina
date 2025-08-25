@@ -137,13 +137,6 @@ func GetStarterClusterTemplate(location string) armcontainerservice.ManagedClust
 				LoadBalancerSKU: to.Ptr(armcontainerservice.LoadBalancerSKUStandard),
 				OutboundType:    to.Ptr(armcontainerservice.OutboundTypeLoadBalancer),
 				NetworkPlugin:   to.Ptr(armcontainerservice.NetworkPluginAzure),
-				LoadBalancerProfile: &armcontainerservice.ManagedClusterLoadBalancerProfile{
-					OutboundIPs: &armcontainerservice.ManagedClusterLoadBalancerProfileOutboundIPs{
-						PublicIPs: []*armcontainerservice.ResourceReference{
-							{ID: to.Ptr("your-public-ip-resource-id")},
-						},
-					},
-				},
 			},
 			WindowsProfile: &armcontainerservice.ManagedClusterWindowsProfile{
 				AdminPassword: to.Ptr("replacePassword1234$"),

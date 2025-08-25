@@ -57,11 +57,13 @@ func GetScaleTestInfra(subID, rg, clusterName, location, kubeConfigFilePath stri
 			Location:          location,
 		}, nil)
 
-		job.AddStep(&azure.CreatePublicIp{
-			PublicIpName: clusterName + "-lb-ip",
-			IPTagType:    "FirstPartyUsage",
-			Tag:          "/NonProd",
-		}, nil)
+		job.AddStep((&azure.CreateCluster{
+			ClusterName: clusterName,
+			Nodes:       nodes,
+		}).
+			SetPodCidr("100.64.0.0/10").
+			SetVMSize("Standard_D4_v3").
+			SetNetworkPluginMode("overlay"), nil)
 
 		job.AddStep(&azure.GetAKSKubeConfig{
 			KubeConfigFilePath: kubeConfigFilePath,
