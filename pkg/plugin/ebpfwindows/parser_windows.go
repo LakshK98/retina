@@ -26,6 +26,7 @@ import (
 )
 
 const MaxInt = int(^uint(0) >> 1)
+const MessageTypePktmonDrop = 100
 
 // Parser is a parser for L3/L4 payloads
 type Parser struct {
@@ -155,11 +156,13 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 	var offset uint
 	var dn *DropNotify
 	var tn *TraceNotify
-	var eventSubType uint8
+	var eventSubType uint32
 	var authType pb.AuthType
 
 	switch eventType {
 	case monitorAPI.MessageTypeDrop:
+		slog.Info("Reached ord drop Events")
+
 		dn = &DropNotify{}
 		if err := DecodeDropNotify(data, dn); err != nil {
 			return fmt.Errorf("failed to parse drop: %w", err)
@@ -175,7 +178,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		if err := DecodeTraceNotify(data, tn); err != nil {
 			return fmt.Errorf("failed to parse trace: %w", err)
 		}
-		eventSubType = tn.ObsPoint
+		eventSubType = uint32(tn.ObsPoint)
 
 		if tn.ObsPoint != 0 {
 			decoded.TraceObservationPoint = pb.TraceObservationPoint(tn.ObsPoint)
@@ -191,6 +194,28 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		}
 
 		packetOffset = int(offset)
+
+	case MessageTypePktmonDrop:
+		slog.Info("Reached pktmon drop event")
+
+		pdn := &PktmonDropNotify{}
+		if err := DecodePktmonDrop(data, pdn); err != nil {
+			return fmt.Errorf("failed to parse pktmon drop here: %w", err)
+		}
+		offset = pdn.DataOffset()
+
+		dn = &DropNotify{}
+		pdn.ConvertToDropNotify(dn)
+		dn.Type = monitorAPI.MessageTypeDrop
+		slog.Info("Pktmon DropNotify", "PktmonNotify", pdn)
+		slog.Info("Pktmon DropNotify", "DropNotify", dn)
+
+		eventSubType = dn.SubType
+		if offset > uint(MaxInt) {
+			return fmt.Errorf("%w: %d", errDataOffsetTooLarge, offset)
+		}
+		packetOffset = int(offset)
+
 	default:
 		return fmt.Errorf("invalid event type: %w", errors.NewErrInvalidType(eventType))
 	}
@@ -487,7 +512,7 @@ func decodeIsReply(tn *TraceNotify) *wrapperspb.BoolValue {
 	}
 }
 
-func decodeCiliumEventType(eventType, eventSubType uint8) *pb.CiliumEventType {
+func decodeCiliumEventType(eventType uint8, eventSubType uint32) *pb.CiliumEventType {
 	return &pb.CiliumEventType{
 		Type:    int32(eventType),
 		SubType: int32(eventSubType),

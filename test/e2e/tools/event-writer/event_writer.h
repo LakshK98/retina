@@ -35,6 +35,7 @@ enum {
 	CILIUM_NOTIFY_POLICY_VERDICT,
 	CILIUM_NOTIFY_CAPTURE,
 	CILIUM_NOTIFY_TRACE_SOCK,
+    PKTMON_NOTIFY_DROP = 100,
 };
 
 enum {
@@ -165,6 +166,27 @@ struct drop_notify {
 	uint8_t        data[128];
 };
 
+
+// struct pktmon_notify {
+// 	uint8_t		type;
+//     uint16_t    version;
+//     uint8_t		subtype;
+// 	uint16_t		source;
+// 	uint32_t		hash;
+//     uint32_t		len_orig;
+// 	uint16_t		len_cap;
+// 	uint32_t		src_label;
+// 	uint32_t		dst_label;
+// 	uint32_t		dst_id; /* 0 for egress */
+// 	uint16_t		line;
+// 	uint8_t		file;
+// 	int8_t		ext_error;
+// 	uint32_t		ifindex;
+// 	uint8_t        data[128];
+// };
+
+// _Static_assert(sizeof(struct pktmon_notify) == 168, "pktmon_notify struct size must be 168 bytes");
+
 struct metrics_key {
 	uint8_t     reason;	/* 0: forwarded, >0 dropped */
 	uint8_t     dir:2,	/* 1: ingress 2: egress */
@@ -187,5 +209,67 @@ struct metrics_value {
 	uint64_t	count;
 	uint64_t	bytes;
 };
+
+
+
+enum _PKTMON_DIRECTION_TAG
+{
+    PktMonDirTag_Unspecified = 0,
+    PktMonDirTag_In,
+    PktMonDirTag_Out,
+    PktMonDirTag_Rx,
+    PktMonDirTag_Tx,
+    PktMonDirTag_Ingress,
+    PktMonDirTag_Egress
+} PKTMON_DIRECTION_TAG;
+
+typedef struct _netevent_data_header
+{
+    uint8_t type;
+    uint16_t version;
+} netevent_data_header_t;
+
+#pragma pack(push, 1)
+
+/* packet descriptor used for event streaming */
+typedef struct _pktmon_evt_stream_packet_descriptor
+{
+    uint32_t packet_original_length;
+    uint32_t packet_logged_length;
+    uint32_t packet_metadata_length;
+} pktmon_evt_stream_packet_descriptor;
+
+/* metadata information used for event streaming */
+typedef struct _pktmon_evt_stream_metadata
+{
+    uint64_t pkt_groupid;
+    uint16_t pkt_count;
+    uint16_t appearance_count;
+    uint16_t direction_name;
+    uint16_t packet_type;
+    uint16_t component_id;
+    uint16_t edge_id;
+    uint16_t filter_id;
+    uint32_t drop_reason;
+    uint32_t drop_location;
+    uint16_t proc_num;
+    uint64_t timestamp;
+} pktmon_evt_stream_metadata;
+
+/* packet header used for event streaming */
+typedef struct _pktmon_evt_stream_packet_header
+{
+    uint8_t eventid;
+    pktmon_evt_stream_packet_descriptor packet_descriptor;
+    pktmon_evt_stream_metadata metadata;
+} pktmon_evt_stream_packet_header;
+
+typedef struct pktmon_notify {
+    netevent_data_header_t version_header;
+    pktmon_evt_stream_packet_header  pktmon_header;
+    uint8_t                           data[128];
+} pktmon_notify_t;
+
+#pragma pack(pop)
 
 #endif  /* _EVENT_WRITER__ */
