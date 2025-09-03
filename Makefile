@@ -227,7 +227,7 @@ container-docker: buildx # util target to build container images using docker bu
 		--build-arg HUBBLE_VERSION=$(HUBBLE_VERSION) \
 		--build-arg VERSION=$(VERSION) $(EXTRA_BUILD_ARGS) \
 		--target=$(TARGET) \
-		-t $(IMAGE_REGISTRY)/$(IMAGE):$(TAG) \
+		-t $(shell echo $(IMAGE_REGISTRY)/$(IMAGE):$(TAG) | tr '[:upper:]' '[:lower:]') \
 		--output type=local,dest=$(ARTIFACTS_DIR) \
 		$(BUILDX_ACTION) \
 		$(CONTEXT_DIR) 
@@ -339,10 +339,6 @@ all-gen: ## generate all code
 	$(MAKE) proto-gen
 	$(MAKE) go-gen
 
-build-windows-binaries:
-	GOOS=windows GOARCH=$(GOARCH) go build -v -o /go/bin/retina/captureworkload -ldflags "-X github.com/microsoft/retina/internal/buildinfo.Version=$(TAG) -X github.com/microsoft/retina/internal/buildinfo.ApplicationInsightsID=$(APP_INSIGHTS_ID)" captureworkload/main.go
-	GOOS=windows GOARCH=$(GOARCH) go build -x -v -o /go/bin/retina/controller -ldflags "-X github.com/microsoft/retina/internal/buildinfo.Version=$(TAG) -X github.com/microsoft/retina/internal/buildinfo.ApplicationInsightsID=$(APP_INSIGHTS_ID)" controller/main.go
-	
 ##@ Multiplatform
 
 manifest-retina-image: ## create a multiplatform manifest for the retina image
