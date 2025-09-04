@@ -73,6 +73,7 @@ func DecodePktmonDrop(data []byte, dn *DropNotify) error {
 	if err := pdn.decodePktmonDrop(data); err != nil {
 		return err
 	}
+	pdn.Type = 1
 	*dn = DropNotify(*pdn)
 	return nil
 }
