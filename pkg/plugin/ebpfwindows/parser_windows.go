@@ -203,6 +203,12 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		if err := DecodePktmonDrop(data, dn); err != nil {
 			return fmt.Errorf("failed to parse pktmon drop here: %w", err)
 		}
+		eventSubType = dn.SubType
+		offset = dn.DataOffset()
+		if offset > uint(MaxInt) {
+			return fmt.Errorf("%w: %d", errDataOffsetTooLarge, offset)
+		}
+		packetOffset = int(offset)
 
 	default:
 		return fmt.Errorf("invalid event type: %w", errors.NewErrInvalidType(eventType))
