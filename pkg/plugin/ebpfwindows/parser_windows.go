@@ -162,6 +162,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 
 	switch eventType {
 	case monitorAPI.MessageTypeDrop:
+		fmt.Printf("Reached ord drop event\n")
 		dn = &DropNotify{}
 		if err := DecodeDropNotify(data, dn); err != nil {
 			return fmt.Errorf("failed to parse drop: %w", err)
@@ -195,6 +196,8 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		packetOffset = int(offset)
 
 	case MessageTypePktmonDrop:
+		fmt.Printf("Reached pktmon drop event\n")
+
 		dn = &DropNotify{}
 		if err := DecodePktmonDrop(data, dn); err != nil {
 			return fmt.Errorf("failed to parse pktmon drop here: %w", err)

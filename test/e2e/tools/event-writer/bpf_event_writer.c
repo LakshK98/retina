@@ -303,21 +303,37 @@ event_writer(xdp_md_t* ctx) {
         }
     }
     else if (flt_evttype == PKTMON_NOTIFY_DROP) {
-        struct pktmon_notify* drp_elm;
+        struct pktmon_notify* pkt_drp_elm;
+        struct drop_notify* drp_elm;
 
+
+        
         //Create a Mock Drop Event
-        drp_elm = (struct pktmon_notify *) bpf_map_lookup_elem(&pktmon_buffer, &buf_key);
+        drp_elm = (struct drop_notify *) bpf_map_lookup_elem(&drp_buffer, &buf_key);
         if (drp_elm == NULL) {
             return XDP_PASS;
         }
         reason = 130;
-        create_pktmon_drop_event(drp_elm);
+        create_drop_event(drp_elm);
         memset(drp_elm->data, 0, sizeof(drp_elm->data));
         memcpy(drp_elm->data, ctx->data, size_to_copy);
+        drp_elm->subtype = 8;
+        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , drp_elm, sizeof(struct drop_notify));
+
+
+        //Create a Mock Drop Event
+        pkt_drp_elm = (struct pktmon_notify *) bpf_map_lookup_elem(&pktmon_buffer, &buf_key);
+        if (pkt_drp_elm == NULL) {
+            return XDP_PASS;
+        }
+        reason = 130;
+        create_pktmon_drop_event(pkt_drp_elm);
+        memset(pkt_drp_elm->data, 0, sizeof(pkt_drp_elm->data));
+        memcpy(pkt_drp_elm->data, ctx->data, size_to_copy);
 
         bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d\n", reason, size_to_copy);
         // memcpy(drp_elm->data, ctx->data, size_to_copy);
-        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , drp_elm, sizeof(struct pktmon_notify));
+        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
     }
     update_metrics(size_to_copy, METRIC_INGRESS, reason, 0, 0);
 
