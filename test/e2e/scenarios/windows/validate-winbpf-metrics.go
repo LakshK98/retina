@@ -231,7 +231,7 @@ func (v *ValidateWinBpfMetric) generatePktmonDropEvents() error {
 
 	output, err := kubernetes.ExecCommandInWinPod(
 		v.KubeConfigFilePath,
-		fmt.Sprintf("C:\\event-writer-helper.bat EventWriter-SetFilter -event 8 -srcIP %s", TestExternalIpAddress),
+		fmt.Sprintf("C:\\event-writer-helper.bat EventWriter-SetFilter -event 100 -srcIP %s", TestExternalIpAddress),
 		v.EbpfXdpDeamonSetNamespace,
 		ebpfLabelSelector,
 		true)
