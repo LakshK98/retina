@@ -52,12 +52,12 @@ type DropNotify struct {
 
 type PktmonDropNotify struct {
 	Type     uint8
+	Version  uint16
 	SubType  uint8
 	Source   uint16
 	Hash     uint32
 	OrigLen  uint32
 	CapLen   uint16
-	Version  uint16
 	SrcLabel identity.NumericIdentity
 	DstLabel identity.NumericIdentity
 	DstID    uint32
@@ -74,7 +74,21 @@ func DecodePktmonDrop(data []byte, dn *DropNotify) error {
 		return err
 	}
 	pdn.Type = 1
-	*dn = DropNotify(*pdn)
+	*dn = DropNotify{}
+	dn.Type = pdn.Type
+	dn.SubType = pdn.SubType
+	dn.Source = pdn.Source
+	dn.Hash = pdn.Hash
+	dn.OrigLen = pdn.OrigLen
+	dn.CapLen = pdn.CapLen
+	dn.Version = pdn.Version
+	dn.SrcLabel = pdn.SrcLabel
+	dn.DstLabel = pdn.DstLabel
+	dn.DstID = pdn.DstID
+	dn.Line = pdn.Line
+	dn.File = pdn.File
+	dn.ExtError = pdn.ExtError
+	dn.Ifindex = pdn.Ifindex
 	return nil
 }
 
@@ -83,7 +97,7 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 		return fmt.Errorf("%w: expected at least %d but got %d", errUnexpectedDropNotifyLength, dropNotifyV1Len, l)
 	}
 
-	version := byteorder.Native.Uint16(data[14:16])
+	version := byteorder.Native.Uint16(data[1:3])
 
 	// Check against max version.
 	if version > DropNotifyVersion1 {
@@ -92,11 +106,11 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 
 	// Decode logic for version >= v0/v1.
 	n.Type = data[0]
-	n.SubType = data[1]
-	n.Source = byteorder.Native.Uint16(data[2:4])
-	n.Hash = byteorder.Native.Uint32(data[4:8])
-	n.OrigLen = byteorder.Native.Uint32(data[8:12])
-	n.CapLen = byteorder.Native.Uint16(data[12:14])
+	n.SubType = data[3]
+	n.Source = byteorder.Native.Uint16(data[4:6])
+	n.Hash = byteorder.Native.Uint32(data[6:10])
+	n.OrigLen = byteorder.Native.Uint32(data[10:14])
+	n.CapLen = byteorder.Native.Uint16(data[14:16])
 	n.Version = version
 	n.SrcLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[16:20]))
 	n.DstLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[20:24]))
