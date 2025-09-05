@@ -203,6 +203,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		if err := DecodePktmonDrop(data, dn); err != nil {
 			return fmt.Errorf("failed to parse pktmon drop here: %w", err)
 		}
+		slog.Info("Pktmon DropNotify", "DropNotify", dn)
 		eventSubType = dn.SubType
 		offset = dn.DataOffset()
 		if offset > uint(MaxInt) {
