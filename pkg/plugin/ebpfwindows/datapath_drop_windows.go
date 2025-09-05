@@ -96,12 +96,26 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 	if l := len(data); l < dropNotifyV1Len {
 		return fmt.Errorf("%w: expected at least %d but got %d", errUnexpectedDropNotifyLength, dropNotifyV1Len, l)
 	}
-
+	fmt.Printf("Raw data bytes: %v\n", data)
+	fmt.Printf("Type: %d\n", data[0])
+	fmt.Printf("Version (bytes 1-2): %v (uint16: %d)\n", data[1:3], byteorder.Native.Uint16(data[1:3]))
+	fmt.Printf("SubType: %d\n", data[3])
+	fmt.Printf("Source (bytes 4-5): %v (uint16: %d)\n", data[4:6], byteorder.Native.Uint16(data[4:6]))
+	fmt.Printf("Hash (bytes 6-9): %v (uint32: %d)\n", data[6:10], byteorder.Native.Uint32(data[6:10]))
+	fmt.Printf("OrigLen (bytes 10-13): %v (uint32: %d)\n", data[10:14], byteorder.Native.Uint32(data[10:14]))
+	fmt.Printf("CapLen (bytes 14-15): %v (uint16: %d)\n", data[14:16], byteorder.Native.Uint16(data[14:16]))
+	fmt.Printf("SrcLabel (bytes 16-19): %v (uint32: %d)\n", data[16:20], byteorder.Native.Uint32(data[16:20]))
+	fmt.Printf("DstLabel (bytes 20-23): %v (uint32: %d)\n", data[20:24], byteorder.Native.Uint32(data[20:24]))
+	fmt.Printf("DstID (bytes 24-27): %v (uint32: %d)\n", data[24:28], byteorder.Native.Uint32(data[24:28]))
+	fmt.Printf("Line (bytes 28-29): %v (uint16: %d)\n", data[28:30], byteorder.Native.Uint16(data[28:30]))
+	fmt.Printf("File (byte 30): %d\n", data[30])
+	fmt.Printf("ExtError (byte 31): %d\n", int8(data[31]))
+	fmt.Printf("Ifindex (bytes 32-35): %v (uint32: %d)\n", data[32:36], byteorder.Native.Uint32(data[32:36]))
 	version := byteorder.Native.Uint16(data[1:3])
 
 	// Check against max version.
 	if version > DropNotifyVersion1 {
-		return fmt.Errorf("%w: Unrecognized drop event version %d", errInvalidDropNotifyVersion, version)
+		return fmt.Errorf("%w: Unrecognized pktmon drop event version %d", errInvalidDropNotifyVersion, version)
 	}
 
 	// Decode logic for version >= v0/v1.
