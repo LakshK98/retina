@@ -260,7 +260,7 @@ func (p *Plugin) handleTraceEvent(data unsafe.Pointer, size uint32) error {
 	eventType := perfData[0]
 	switch eventType {
 	case monitorAPI.MessageTypeDrop:
-		slog.Info("Reached ord drop Events")
+		slog.Info("Reached ord drop Events1")
 		if size <= uint32(unsafe.Sizeof(DropNotify{})) {
 			return fmt.Errorf("%w: %d", errInvalidDropNotifySize, size)
 		}

@@ -169,12 +169,12 @@ struct drop_notify {
 
 struct pktmon_notify {
 	uint8_t		type;
+    uint16_t    version;
     uint8_t		subtype;
 	uint16_t		source;
 	uint32_t		hash;
     uint32_t		len_orig;
 	uint16_t		len_cap;
-	uint16_t		version;
 	uint32_t		src_label;
 	uint32_t		dst_label;
 	uint32_t		dst_id; /* 0 for egress */
