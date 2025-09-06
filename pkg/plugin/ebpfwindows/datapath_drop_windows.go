@@ -95,7 +95,7 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 	if l := len(data); l < dropNotifyV1Len {
 		return fmt.Errorf("%w: expected at least %d but got %d", errUnexpectedDropNotifyLength, dropNotifyV1Len, l)
 	}
-	version := byteorder.Native.Uint16(data[2:4])
+	version := byteorder.Native.Uint16(data[1:3])
 
 	// Check against max version.
 	if version > DropNotifyVersion1 {
@@ -103,7 +103,7 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 			errInvalidDropNotifyVersion, version,
 			data,
 			data[0],
-			data[2:4], version,
+			data[1:3], version,
 			data[4],
 			data[6:8], byteorder.Native.Uint16(data[6:8]),
 			data[8:12], byteorder.Native.Uint32(data[8:12]),
@@ -121,11 +121,11 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 
 	// Decode logic for version >= v0/v1.
 	n.Type = data[0]
-	n.SubType = data[4]
-	n.Source = byteorder.Native.Uint16(data[6:8])
-	n.Hash = byteorder.Native.Uint32(data[8:12])
-	n.OrigLen = byteorder.Native.Uint32(data[12:16])
-	n.CapLen = byteorder.Native.Uint16(data[16:18])
+	n.SubType = data[3]
+	n.Source = byteorder.Native.Uint16(data[4:6])
+	n.Hash = byteorder.Native.Uint32(data[6:10])
+	n.OrigLen = byteorder.Native.Uint32(data[10:14])
+	n.CapLen = byteorder.Native.Uint16(data[14:16])
 	n.Version = version
 	n.SrcLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[16:20]))
 	n.DstLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[20:24]))

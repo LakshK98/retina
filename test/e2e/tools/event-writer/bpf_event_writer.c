@@ -126,7 +126,7 @@ void create_drop_event(struct drop_notify* drp_elm)
 	drp_elm->line		= 0;
     drp_elm->file		= 0;
     drp_elm->ext_error	= 0;
-	drp_elm->ifindex	= 0;
+	drp_elm->ifindex	= 1;
 }
 
 void create_pktmon_drop_event(struct pktmon_notify* drp_elm)
