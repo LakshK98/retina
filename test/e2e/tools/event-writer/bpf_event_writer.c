@@ -139,13 +139,13 @@ void create_pktmon_drop_event(struct pktmon_notify* drp_elm)
 	drp_elm->len_orig   = 128;
 	drp_elm->len_cap    = 128;
 	drp_elm->version    = 1;
-	drp_elm->src_label	= 5;
-	drp_elm->dst_label	= 257;
-	drp_elm->dst_id		= 3;
-	drp_elm->line		= 14;
-    drp_elm->file		= 22;
-    drp_elm->ext_error	= 2;
-	drp_elm->ifindex	= 12;
+	drp_elm->src_label	= 0;
+	drp_elm->dst_label	= 0;
+	drp_elm->dst_id		= 0;
+	drp_elm->line		= 0;
+    drp_elm->file		= 0;
+    drp_elm->ext_error	= 0;
+	drp_elm->ifindex	= 0;
 }
 
 int
