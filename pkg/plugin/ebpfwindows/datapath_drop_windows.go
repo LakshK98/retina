@@ -74,7 +74,6 @@ func DecodePktmonDrop(data []byte, dn *DropNotify) error {
 		return err
 	}
 	pdn.Type = 1
-	*dn = DropNotify{}
 	dn.Type = pdn.Type
 	dn.SubType = pdn.SubType
 	dn.Source = pdn.Source
