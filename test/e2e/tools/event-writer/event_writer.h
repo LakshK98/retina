@@ -167,8 +167,7 @@ struct drop_notify {
 };
 
 
-#pragma pack(push, 1)
-struct pktmon_notify {
+struct __attribute__((packed)) pktmon_notify {
 	uint8_t		type;
     uint16_t    version;
     uint8_t		subtype;
@@ -185,7 +184,7 @@ struct pktmon_notify {
 	uint32_t		ifindex;
 	uint8_t        data[128];
 };
-#pragma pack(pop)
+
 struct metrics_key {
 	uint8_t     reason;	/* 0: forwarded, >0 dropped */
 	uint8_t     dir:2,	/* 1: ingress 2: egress */

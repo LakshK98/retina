@@ -104,7 +104,7 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 			data,
 			data[0],
 			data[1:3], version,
-			data[4],
+			data[4:6],
 			data[6:8], byteorder.Native.Uint16(data[6:8]),
 			data[8:12], byteorder.Native.Uint32(data[8:12]),
 			data[12:16], byteorder.Native.Uint32(data[12:16]),
