@@ -119,7 +119,6 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 			data[32:36], byteorder.Native.Uint32(data[32:36]),
 		)
 	}
-	}
 
 	// Decode logic for version >= v0/v1.
 	n.Type = data[0]
