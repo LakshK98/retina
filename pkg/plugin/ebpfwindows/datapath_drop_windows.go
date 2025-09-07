@@ -99,24 +99,26 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 
 	// Check against max version.
 	if version > DropNotifyVersion1 {
-		return fmt.Errorf("%w: Unrecognized pktmon drop event version %d\nRaw data bytes: %v\nType: %d\nVersion (bytes 1-2): %v (uint16: %d)\nSubType: %d\nSource (bytes 4-5): %v (uint16: %d)\nHash (bytes 6-9): %v (uint32: %d)\nOrigLen (bytes 10-13): %v (uint32: %d)\nCapLen (bytes 14-15): %v (uint16: %d)\nSrcLabel (bytes 16-19): %v (uint32: %d)\nDstLabel (bytes 20-23): %v (uint32: %d)\nDstID (bytes 24-27): %v (uint32: %d)\nLine (bytes 28-29): %v (uint16: %d)\nFile (byte 30): %d\nExtError (byte 31): %d\nIfindex (bytes 32-35): %v (uint32: %d)",
+		return fmt.Errorf("%w: Unrecognized pktmon drop event version %d\nRaw data bytes: %v\nData size: %d\nType: %d\nVersion (bytes 1-2): %v (uint16: %d)\nSubType: %d\nSource (bytes 4-5): %v (uint16: %d)\nHash (bytes 6-9): %v (uint32: %d)\nOrigLen (bytes 10-13): %v (uint32: %d)\nCapLen (bytes 14-15): %v (uint16: %d)\nSrcLabel (bytes 16-19): %v (uint32: %d)\nDstLabel (bytes 20-23): %v (uint32: %d)\nDstID (bytes 24-27): %v (uint32: %d)\nLine (bytes 28-29): %v (uint16: %d)\nFile (byte 30): %d\nExtError (byte 31): %d\nIfindex (bytes 32-35): %v (uint32: %d)",
 			errInvalidDropNotifyVersion, version,
 			data,
+			len(data),
 			data[0],
 			data[1:3], version,
-			data[4:6],
-			data[6:8], byteorder.Native.Uint16(data[6:8]),
-			data[8:12], byteorder.Native.Uint32(data[8:12]),
-			data[12:16], byteorder.Native.Uint32(data[12:16]),
-			data[16:18], byteorder.Native.Uint16(data[16:18]),
-			data[18:22], byteorder.Native.Uint32(data[18:22]),
-			data[22:26], byteorder.Native.Uint32(data[22:26]),
+			data[3],
+			data[4:6], byteorder.Native.Uint16(data[4:6]),
+			data[6:10], byteorder.Native.Uint32(data[6:10]),
+			data[10:14], byteorder.Native.Uint32(data[10:14]),
+			data[14:16], byteorder.Native.Uint16(data[14:16]),
+			data[16:20], byteorder.Native.Uint32(data[16:20]),
+			data[20:24], byteorder.Native.Uint32(data[20:24]),
 			data[24:28], byteorder.Native.Uint32(data[24:28]),
 			data[28:30], byteorder.Native.Uint16(data[28:30]),
 			data[30],
 			int8(data[31]),
 			data[32:36], byteorder.Native.Uint32(data[32:36]),
 		)
+	}
 	}
 
 	// Decode logic for version >= v0/v1.
