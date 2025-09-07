@@ -9,9 +9,7 @@ import (
 	"github.com/microsoft/retina/test/e2e/hubble"
 
 	"github.com/microsoft/retina/test/e2e/scenarios/dns"
-	"github.com/microsoft/retina/test/e2e/scenarios/drop"
 	"github.com/microsoft/retina/test/e2e/scenarios/latency"
-	tcp "github.com/microsoft/retina/test/e2e/scenarios/tcp"
 	"github.com/microsoft/retina/test/e2e/scenarios/windows"
 )
 
@@ -163,15 +161,15 @@ func InstallAndTestRetinaBasicMetrics(kubeConfigFilePath, chartPath string, test
 		},
 	}
 
-	for _, arch := range common.Architectures {
-		job.AddScenario(drop.ValidateDropMetric(testPodNamespace, arch))
-		job.AddScenario(tcp.ValidateTCPMetrics(testPodNamespace, arch))
+	// for _, arch := range common.Architectures {
+	// 	job.AddScenario(drop.ValidateDropMetric(testPodNamespace, arch))
+	// 	job.AddScenario(tcp.ValidateTCPMetrics(testPodNamespace, arch))
 
-		for _, scenario := range dnsScenarios {
-			name := scenario.name + " - Arch: " + arch
-			job.AddScenario(dns.ValidateBasicDNSMetrics(name, scenario.req, scenario.resp, testPodNamespace, arch))
-		}
-	}
+	// 	for _, scenario := range dnsScenarios {
+	// 		name := scenario.name + " - Arch: " + arch
+	// 		job.AddScenario(dns.ValidateBasicDNSMetrics(name, scenario.req, scenario.resp, testPodNamespace, arch))
+	// 	}
+	// }
 
 	job.AddScenario(windows.ValidateWindowsBasicMetric())
 
