@@ -335,7 +335,9 @@ event_writer(xdp_md_t* ctx) {
         memset(pkt_drp_elm->data, 0, sizeof(pkt_drp_elm->data));
         memcpy(pkt_drp_elm->data, ctx->data, size_to_copy);
 
-        bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d, pktmon_struct_size=%llu, drop_struct_size=%llu \n", reason, size_to_copy, pktmon_size, drop_size);
+        bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d \n", reason, size_to_copy, pktmon_size, drop_size);
+        bpf_printk("PKTMON_NOTIFY_DROP sizes :  pktmon_struct_size=%llu, drop_struct_size=%llu \n", pktmon_size, drop_size);
+        
         // memcpy(drp_elm->data, ctx->data, size_to_copy);
         bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
     }
