@@ -126,7 +126,7 @@ void create_drop_event(struct drop_notify* drp_elm)
 	drp_elm->line		= 0;
     drp_elm->file		= 0;
     drp_elm->ext_error	= 0;
-	drp_elm->ifindex	= 1;
+	drp_elm->ifindex	= 0;
 }
 
 void create_pktmon_drop_event(struct pktmon_notify* drp_elm)
@@ -145,7 +145,7 @@ void create_pktmon_drop_event(struct pktmon_notify* drp_elm)
 	drp_elm->line		= 0;
     drp_elm->file		= 0;
     drp_elm->ext_error	= 0;
-	drp_elm->ifindex	= 0;
+	drp_elm->ifindex	= 1;
 }
 
 int
@@ -334,7 +334,7 @@ event_writer(xdp_md_t* ctx) {
         memset(pkt_drp_elm->data, 0, sizeof(pkt_drp_elm->data));
         memcpy(pkt_drp_elm->data, ctx->data, size_to_copy);
 
-        bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d\n", reason, size_to_copy);
+        bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d, pktmon_struct_size=%d, drop_struct_size=%d \n", reason, size_to_copy, sizeof(struct pktmon_notify), sizeof(struct drop_notify));
         // memcpy(drp_elm->data, ctx->data, size_to_copy);
         bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
     }
