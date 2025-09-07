@@ -205,7 +205,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		}
 		slog.Info("Pktmon DropNotify", "DropNotify", dn)
 		eventSubType = dn.SubType
-		offset = dn.DataOffset()
+		offset = 40
 		if offset > uint(MaxInt) {
 			return fmt.Errorf("%w: %d", errDataOffsetTooLarge, offset)
 		}

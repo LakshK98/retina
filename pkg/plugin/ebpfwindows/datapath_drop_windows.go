@@ -95,7 +95,7 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 	if l := len(data); l < dropNotifyV1Len {
 		return fmt.Errorf("%w: expected at least %d but got %d", errUnexpectedDropNotifyLength, dropNotifyV1Len, l)
 	}
-	version := byteorder.Native.Uint16(data[1:3])
+	version := byteorder.Native.Uint16(data[2:4])
 
 	// Check against max version.
 	if version > DropNotifyVersion1 {
@@ -104,37 +104,37 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 			data,
 			len(data),
 			data[0],
-			data[1:3], version,
-			data[3],
-			data[4:6], byteorder.Native.Uint16(data[4:6]),
-			data[6:10], byteorder.Native.Uint32(data[6:10]),
-			data[10:14], byteorder.Native.Uint32(data[10:14]),
-			data[14:16], byteorder.Native.Uint16(data[14:16]),
-			data[16:20], byteorder.Native.Uint32(data[16:20]),
-			data[20:24], byteorder.Native.Uint32(data[20:24]),
-			data[24:28], byteorder.Native.Uint32(data[24:28]),
-			data[28:30], byteorder.Native.Uint16(data[28:30]),
-			data[30],
-			int8(data[31]),
-			data[32:36], byteorder.Native.Uint32(data[32:36]),
+			data[2:4], version,
+			data[4],
+			data[6:8], byteorder.Native.Uint16(data[6:8]),
+			data[8:12], byteorder.Native.Uint32(data[8:12]),
+			data[12:16], byteorder.Native.Uint32(data[12:16]),
+			data[16:18], byteorder.Native.Uint16(data[16:18]),
+			data[18:22], byteorder.Native.Uint32(data[20:24]),
+			data[22:26], byteorder.Native.Uint32(data[24:28]),
+			data[26:30], byteorder.Native.Uint32(data[28:32]),
+			data[30:32], byteorder.Native.Uint16(data[32:34]),
+			data[32],
+			int8(data[33]),
+			data[34:38], byteorder.Native.Uint32(data[34:38]),
 		)
 	}
 
 	// Decode logic for version >= v0/v1.
 	n.Type = data[0]
-	n.SubType = data[3]
-	n.Source = byteorder.Native.Uint16(data[4:6])
-	n.Hash = byteorder.Native.Uint32(data[6:10])
-	n.OrigLen = byteorder.Native.Uint32(data[10:14])
-	n.CapLen = byteorder.Native.Uint16(data[14:16])
+	n.SubType = data[4]
+	n.Source = byteorder.Native.Uint16(data[6:8])
+	n.Hash = byteorder.Native.Uint32(data[8:12])
+	n.OrigLen = byteorder.Native.Uint32(data[12:16])
+	n.CapLen = byteorder.Native.Uint16(data[16:18])
 	n.Version = version
-	n.SrcLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[16:20]))
-	n.DstLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[20:24]))
-	n.DstID = byteorder.Native.Uint32(data[24:28])
-	n.Line = byteorder.Native.Uint16(data[28:30])
-	n.File = data[30]
-	n.ExtError = int8(data[31])
-	n.Ifindex = byteorder.Native.Uint32(data[32:36])
+	n.SrcLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[20:24]))
+	n.DstLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[24:28]))
+	n.DstID = byteorder.Native.Uint32(data[28:32])
+	n.Line = byteorder.Native.Uint16(data[32:34])
+	n.File = data[34]
+	n.ExtError = int8(data[35])
+	n.Ifindex = byteorder.Native.Uint32(data[36:40])
 
 	return nil
 }
