@@ -309,8 +309,9 @@ event_writer(xdp_md_t* ctx) {
         struct pktmon_notify* pkt_drp_elm;
         struct drop_notify* drp_elm;
 
+        uint64_t pktmon_size = sizeof(struct pktmon_notify);
+        uint64_t drop_size = sizeof(struct drop_notify);
 
-        
         //Create a Mock Drop Event
         drp_elm = (struct drop_notify *) bpf_map_lookup_elem(&drp_buffer, &buf_key);
         if (drp_elm == NULL) {
@@ -334,7 +335,7 @@ event_writer(xdp_md_t* ctx) {
         memset(pkt_drp_elm->data, 0, sizeof(pkt_drp_elm->data));
         memcpy(pkt_drp_elm->data, ctx->data, size_to_copy);
 
-        bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d, pktmon_struct_size=%d, drop_struct_size=%d \n", reason, size_to_copy, sizeof(struct pktmon_notify), sizeof(struct drop_notify));
+        bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d, pktmon_struct_size=%llu, drop_struct_size=%llu \n", reason, size_to_copy, pktmon_size, drop_size);
         // memcpy(drp_elm->data, ctx->data, size_to_copy);
         bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
     }
