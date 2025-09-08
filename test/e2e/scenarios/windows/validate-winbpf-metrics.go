@@ -421,7 +421,7 @@ func (v *ValidateWinBpfMetric) verifyAdvancedMetrics(nonHpcIpAddr, promOutput st
 		"ip":            "23.192.228.84",
 		"namespace":     "",
 		"podname":       "",
-		"reason":        "DropReason_Drop_Busy",
+		"reason":        "Drop_Busy",
 		"workload_kind": "unknown",
 		"workload_name": "unknown",
 	}
