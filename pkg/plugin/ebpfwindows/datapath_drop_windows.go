@@ -21,6 +21,7 @@ const (
 	// dropNotifyV1Len is the amount of packet data provided in a v0/v1 drop notification.
 	dropNotifyV1Len       = 36
 	dropPktmonNotifyV1Len = 57
+	maxCapLength          = 128
 )
 
 var dropNotifyLengthFromVersion = map[uint16]uint{
@@ -28,9 +29,9 @@ var dropNotifyLengthFromVersion = map[uint16]uint{
 	DropNotifyVersion1: dropNotifyV1Len,
 }
 
-// var PktmonDropNotifyLengthFromVersion = map[uint16]uint{
-// 	DropNotifyVersion0: dropPktmonNotifyV1Len, // retain backwards compatibility for testing.
-// }
+var PktmonDropNotifyLengthFromVersion = map[uint16]uint{
+	DropNotifyVersion1: dropPktmonNotifyV1Len, // retain backwards compatibility for testing.
+}
 
 var (
 	errUnexpectedDropNotifyLength = errors.New("unexpected DropNotify data length")
@@ -40,7 +41,7 @@ var (
 // DropNotify is the message format of a drop notification in the BPF ring buffer
 type DropNotify struct {
 	Type     uint8
-	SubType  uint8
+	SubType  uint32
 	Source   uint16
 	Hash     uint32
 	OrigLen  uint32
@@ -93,17 +94,17 @@ type PktmonDropNotify struct {
 }
 
 // DecodeDropNotify will decode 'data' into the provided DropNotify structure
-func DecodePktmonDrop(data []byte, dn *DropNotify) error {
-	pdn := &PktmonDropNotify{}
+func DecodePktmonDrop(data []byte, pdn *PktmonDropNotify) error {
 	if err := pdn.decodePktmonDrop(data); err != nil {
 		return err
 	}
-	dn.Type = 1
-	dn.SubType = uint8(pdn.PktmonHeader.Metadata.DropReason)
-	dn.OrigLen = 128
-	dn.CapLen = 128
-	dn.Version = pdn.VersionHeader.Version
 	return nil
+}
+
+// DataOffset returns the offset from the beginning of PktmonDropNotify where the
+// notification data begins.
+func (n *PktmonDropNotify) DataOffset() uint {
+	return dropNotifyLengthFromVersion[n.VersionHeader.Version]
 }
 
 func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
@@ -142,6 +143,14 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 	return nil
 }
 
+func (n *PktmonDropNotify) ConvertToDropNotify(dn *DropNotify) {
+	dn.Type = 1
+	dn.SubType = n.PktmonHeader.Metadata.DropReason
+	dn.OrigLen = n.PktmonHeader.PacketDescriptor.PacketOriginalLength
+	dn.CapLen = uint16(min(maxCapLength, dn.OrigLen))
+	dn.Version = n.VersionHeader.Version
+}
+
 // DecodeDropNotify will decode 'data' into the provided DropNotify structure
 func DecodeDropNotify(data []byte, dn *DropNotify) error {
 	return dn.decodeDropNotify(data)
@@ -161,7 +170,7 @@ func (n *DropNotify) decodeDropNotify(data []byte) error {
 
 	// Decode logic for version >= v0/v1.
 	n.Type = data[0]
-	n.SubType = data[1]
+	n.SubType = uint32(data[1])
 	n.Source = byteorder.Native.Uint16(data[2:4])
 	n.Hash = byteorder.Native.Uint32(data[4:8])
 	n.OrigLen = byteorder.Native.Uint32(data[8:12])

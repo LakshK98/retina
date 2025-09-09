@@ -270,28 +270,6 @@ event_writer(xdp_md_t* ctx) {
         
         drp_elm->subtype = 9;
         bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , drp_elm, sizeof(struct drop_notify));
-
-        // Create Windows specific drop event with hardcoded reason code
-        {
-            struct metrics_value *win_entry, win_new_entry = {};
-            struct windows_metrics_key win_key = {};
-
-            win_key.type   = -DROP_PKTMON;
-            win_key.reason = Drop_FL_InterfaceNotReady;
-            win_key.dir    = METRIC_INGRESS;
-            win_key.line   = 0;
-            win_key.file   = 0;
-
-            win_entry = bpf_map_lookup_elem(&windows_metrics, &win_key);
-            if (win_entry) {
-                win_entry->count += 1;
-                win_entry->bytes += size_to_copy;
-            } else {
-                win_new_entry.count = 1;
-                win_new_entry.bytes = size_to_copy;
-                bpf_map_update_elem(&windows_metrics, &win_key, &win_new_entry, 0);
-            }
-        }
     }
     else if (flt_evttype == PKTMON_NOTIFY_DROP) {
         struct pktmon_notify* pkt_drp_elm;
@@ -336,6 +314,31 @@ event_writer(xdp_md_t* ctx) {
         
         // memcpy(drp_elm->data, ctx->data, size_to_copy);
         bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
+        pkt_drp_elm->pktmon_header.metadata.drop_reason = 0x10000000;
+        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
+
+
+        // Create Windows specific drop event with hardcoded reason code
+        {
+            struct metrics_value *win_entry, win_new_entry = {};
+            struct windows_metrics_key win_key = {};
+
+            win_key.type   = -DROP_PKTMON;
+            win_key.reason = Drop_FL_InterfaceNotReady;
+            win_key.dir    = METRIC_INGRESS;
+            win_key.line   = 0;
+            win_key.file   = 0;
+
+            win_entry = bpf_map_lookup_elem(&windows_metrics, &win_key);
+            if (win_entry) {
+                win_entry->count += 1;
+                win_entry->bytes += size_to_copy;
+            } else {
+                win_new_entry.count = 1;
+                win_new_entry.bytes = size_to_copy;
+                bpf_map_update_elem(&windows_metrics, &win_key, &win_new_entry, 0);
+            }
+        }
     }
     update_metrics(size_to_copy, METRIC_INGRESS, reason, 0, 0);
 
