@@ -129,23 +129,11 @@ void create_drop_event(struct drop_notify* drp_elm)
 	drp_elm->ifindex	= 0;
 }
 
-void create_pktmon_drop_event(struct pktmon_notify* drp_elm)
+void create_pktmon_drop_event(pktmon_notify_t* pktmon_drp_elm)
 {
-    memset(drp_elm, 0, sizeof(struct pktmon_notify));
-    drp_elm->type       = PKTMON_NOTIFY_DROP;
-	drp_elm->subtype    = 7;
-	drp_elm->source     = 11; // random source
-	drp_elm->hash       = 0;
-	drp_elm->len_orig   = 128;
-	drp_elm->len_cap    = 128;
-	drp_elm->version    = 1;
-	drp_elm->src_label	= 0;
-	drp_elm->dst_label	= 0;
-	drp_elm->dst_id		= 0;
-	drp_elm->line		= 0;
-    drp_elm->file		= 0;
-    drp_elm->ext_error	= 0;
-	drp_elm->ifindex	= 1;
+    memset(pktmon_drp_elm, 0, sizeof(pktmon_notify_t));
+    pktmon_drp_elm->version_header.type       = PKTMON_NOTIFY_DROP;
+    pktmon_drp_elm->pktmon_header.metadata.drop_reason = 7;
 }
 
 int

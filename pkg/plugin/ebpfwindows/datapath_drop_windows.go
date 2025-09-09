@@ -19,13 +19,18 @@ const (
 
 const (
 	// dropNotifyV1Len is the amount of packet data provided in a v0/v1 drop notification.
-	dropNotifyV1Len = 36
+	dropNotifyV1Len       = 36
+	dropPktmonNotifyV1Len = 57
 )
 
 var dropNotifyLengthFromVersion = map[uint16]uint{
 	DropNotifyVersion0: dropNotifyV1Len, // retain backwards compatibility for testing.
 	DropNotifyVersion1: dropNotifyV1Len,
 }
+
+// var PktmonDropNotifyLengthFromVersion = map[uint16]uint{
+// 	DropNotifyVersion0: dropPktmonNotifyV1Len, // retain backwards compatibility for testing.
+// }
 
 var (
 	errUnexpectedDropNotifyLength = errors.New("unexpected DropNotify data length")
@@ -50,21 +55,41 @@ type DropNotify struct {
 	Ifindex  uint32
 }
 
+type NetEventDataHeader struct {
+	Type    uint8  // uint8_t type
+	Version uint16 // uint16_t version
+}
+
+type PktmonEvtStreamPacketDescriptor struct {
+	PacketOriginalLength uint32 // uint32_t packet_original_length
+	PacketLoggedLength   uint32 // uint32_t packet_logged_length
+	PacketMetadataLength uint32 // uint32_t packet_metadata_length
+}
+
+type PktmonEvtStreamMetadata struct {
+	PktGroupID      uint64 // uint64_t pkt_groupid
+	PktCount        uint16 // uint16_t pkt_count
+	AppearanceCount uint16 // uint16_t appearance_count
+	DirectionName   uint16 // uint16_t direction_name
+	PacketType      uint16 // uint16_t packet_type
+	ComponentID     uint16 // uint16_t component_id
+	EdgeID          uint16 // uint16_t edge_id
+	FilterID        uint16 // uint16_t filter_id
+	DropReason      uint32 // uint32_t drop_reason
+	DropLocation    uint32 // uint32_t drop_location
+	ProcNum         uint16 // uint16_t proc_num
+	Timestamp       uint64 // uint64_t timestamp
+}
+
+type PktmonEvtStreamPacketHeader struct {
+	EventID          uint8                           // uint8_t eventid
+	PacketDescriptor PktmonEvtStreamPacketDescriptor // pktmon_evt_stream_packet_descriptor
+	Metadata         PktmonEvtStreamMetadata         // pktmon_evt_stream_metadata
+}
+
 type PktmonDropNotify struct {
-	Type     uint8
-	Version  uint16
-	SubType  uint8
-	Source   uint16
-	Hash     uint32
-	OrigLen  uint32
-	CapLen   uint16
-	SrcLabel identity.NumericIdentity
-	DstLabel identity.NumericIdentity
-	DstID    uint32
-	Line     uint16
-	File     uint8
-	ExtError int8
-	Ifindex  uint32
+	VersionHeader NetEventDataHeader          // netevent_data_header_t version_header
+	PktmonHeader  PktmonEvtStreamPacketHeader // pktmon_evt_stream_packet_header pktmon_header
 }
 
 // DecodeDropNotify will decode 'data' into the provided DropNotify structure
@@ -73,69 +98,47 @@ func DecodePktmonDrop(data []byte, dn *DropNotify) error {
 	if err := pdn.decodePktmonDrop(data); err != nil {
 		return err
 	}
-	pdn.Type = 1
-	dn.Type = pdn.Type
-	dn.SubType = pdn.SubType
-	dn.Source = pdn.Source
-	dn.Hash = pdn.Hash
-	dn.OrigLen = pdn.OrigLen
-	dn.CapLen = pdn.CapLen
-	dn.Version = pdn.Version
-	dn.SrcLabel = pdn.SrcLabel
-	dn.DstLabel = pdn.DstLabel
-	dn.DstID = pdn.DstID
-	dn.Line = pdn.Line
-	dn.File = pdn.File
-	dn.ExtError = pdn.ExtError
-	dn.Ifindex = pdn.Ifindex
+	dn.Type = 1
+	dn.SubType = uint8(pdn.PktmonHeader.Metadata.DropReason)
+	dn.OrigLen = 128
+	dn.CapLen = 128
+	dn.Version = pdn.VersionHeader.Version
 	return nil
 }
 
 func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
-	if l := len(data); l < dropNotifyV1Len {
-		return fmt.Errorf("%w: expected at least %d but got %d", errUnexpectedDropNotifyLength, dropNotifyV1Len, l)
+	if l := len(data); l < dropPktmonNotifyV1Len {
+		return fmt.Errorf("%w: expected at least %d but got %d", errUnexpectedDropNotifyLength, dropPktmonNotifyV1Len, l)
 	}
 	version := byteorder.Native.Uint16(data[2:4])
 
 	// Check against max version.
 	if version > DropNotifyVersion1 {
-		return fmt.Errorf("%w: Unrecognized pktmon drop event version %d\nRaw data bytes: %v\nData size: %d\nType: %d\nVersion (bytes 1-2): %v (uint16: %d)\nSubType: %d\nSource (bytes 4-5): %v (uint16: %d)\nHash (bytes 6-9): %v (uint32: %d)\nOrigLen (bytes 10-13): %v (uint32: %d)\nCapLen (bytes 14-15): %v (uint16: %d)\nSrcLabel (bytes 16-19): %v (uint32: %d)\nDstLabel (bytes 20-23): %v (uint32: %d)\nDstID (bytes 24-27): %v (uint32: %d)\nLine (bytes 28-29): %v (uint16: %d)\nFile (byte 30): %d\nExtError (byte 31): %d\nIfindex (bytes 32-35): %v (uint32: %d)",
+		return fmt.Errorf("%w: Unrecognized pktmon drop event version %d\nRaw data bytes: %v\nData size: %d\nType: %d\n",
 			errInvalidDropNotifyVersion, version,
 			data,
-			len(data),
-			data[0],
-			data[2:4], version,
-			data[4],
-			data[6:8], byteorder.Native.Uint16(data[6:8]),
-			data[8:12], byteorder.Native.Uint32(data[8:12]),
-			data[12:16], byteorder.Native.Uint32(data[12:16]),
-			data[16:18], byteorder.Native.Uint16(data[16:18]),
-			data[18:22], byteorder.Native.Uint32(data[20:24]),
-			data[22:26], byteorder.Native.Uint32(data[24:28]),
-			data[26:30], byteorder.Native.Uint32(data[28:32]),
-			data[30:32], byteorder.Native.Uint16(data[32:34]),
-			data[32],
-			int8(data[33]),
-			data[34:38], byteorder.Native.Uint32(data[34:38]),
-		)
+			len(data))
 	}
 
 	// Decode logic for version >= v0/v1.
-	n.Type = data[0]
-	n.SubType = data[4]
-	n.Source = byteorder.Native.Uint16(data[6:8])
-	n.Hash = byteorder.Native.Uint32(data[8:12])
-	n.OrigLen = byteorder.Native.Uint32(data[12:16])
-	n.CapLen = byteorder.Native.Uint16(data[16:18])
-	n.Version = version
-	n.SrcLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[20:24]))
-	n.DstLabel = identity.NumericIdentity(byteorder.Native.Uint32(data[24:28]))
-	n.DstID = byteorder.Native.Uint32(data[28:32])
-	n.Line = byteorder.Native.Uint16(data[32:34])
-	n.File = data[34]
-	n.ExtError = int8(data[35])
-	n.Ifindex = byteorder.Native.Uint32(data[36:40])
-
+	n.VersionHeader.Type = data[0]
+	n.VersionHeader.Version = version
+	n.PktmonHeader.EventID = data[4]
+	n.PktmonHeader.PacketDescriptor.PacketOriginalLength = byteorder.Native.Uint32(data[6:10])
+	n.PktmonHeader.PacketDescriptor.PacketLoggedLength = byteorder.Native.Uint32(data[10:14])
+	n.PktmonHeader.PacketDescriptor.PacketMetadataLength = byteorder.Native.Uint32(data[14:18])
+	n.PktmonHeader.Metadata.PktGroupID = byteorder.Native.Uint64(data[18:26])
+	n.PktmonHeader.Metadata.PktCount = byteorder.Native.Uint16(data[26:28])
+	n.PktmonHeader.Metadata.AppearanceCount = byteorder.Native.Uint16(data[28:30])
+	n.PktmonHeader.Metadata.DirectionName = byteorder.Native.Uint16(data[30:32])
+	n.PktmonHeader.Metadata.PacketType = byteorder.Native.Uint16(data[32:34])
+	n.PktmonHeader.Metadata.ComponentID = byteorder.Native.Uint16(data[34:36])
+	n.PktmonHeader.Metadata.EdgeID = byteorder.Native.Uint16(data[36:38])
+	n.PktmonHeader.Metadata.FilterID = byteorder.Native.Uint16(data[38:40])
+	n.PktmonHeader.Metadata.DropReason = byteorder.Native.Uint32(data[40:44])
+	n.PktmonHeader.Metadata.DropLocation = byteorder.Native.Uint32(data[44:48])
+	n.PktmonHeader.Metadata.ProcNum = byteorder.Native.Uint16(data[48:50])
+	n.PktmonHeader.Metadata.Timestamp = byteorder.Native.Uint64(data[50:58])
 	return nil
 }
 
