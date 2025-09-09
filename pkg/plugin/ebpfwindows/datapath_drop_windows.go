@@ -124,21 +124,21 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 	n.VersionHeader.Type = data[0]
 	n.VersionHeader.Version = version
 	n.PktmonHeader.EventID = data[4]
-	n.PktmonHeader.PacketDescriptor.PacketOriginalLength = byteorder.Native.Uint32(data[6:10])
-	n.PktmonHeader.PacketDescriptor.PacketLoggedLength = byteorder.Native.Uint32(data[10:14])
-	n.PktmonHeader.PacketDescriptor.PacketMetadataLength = byteorder.Native.Uint32(data[14:18])
-	n.PktmonHeader.Metadata.PktGroupID = byteorder.Native.Uint64(data[18:26])
-	n.PktmonHeader.Metadata.PktCount = byteorder.Native.Uint16(data[26:28])
-	n.PktmonHeader.Metadata.AppearanceCount = byteorder.Native.Uint16(data[28:30])
-	n.PktmonHeader.Metadata.DirectionName = byteorder.Native.Uint16(data[30:32])
-	n.PktmonHeader.Metadata.PacketType = byteorder.Native.Uint16(data[32:34])
-	n.PktmonHeader.Metadata.ComponentID = byteorder.Native.Uint16(data[34:36])
-	n.PktmonHeader.Metadata.EdgeID = byteorder.Native.Uint16(data[36:38])
-	n.PktmonHeader.Metadata.FilterID = byteorder.Native.Uint16(data[38:40])
-	n.PktmonHeader.Metadata.DropReason = byteorder.Native.Uint32(data[40:44])
-	n.PktmonHeader.Metadata.DropLocation = byteorder.Native.Uint32(data[44:48])
-	n.PktmonHeader.Metadata.ProcNum = byteorder.Native.Uint16(data[48:50])
-	n.PktmonHeader.Metadata.Timestamp = byteorder.Native.Uint64(data[50:58])
+	n.PktmonHeader.PacketDescriptor.PacketOriginalLength = byteorder.Native.Uint32(data[5:9])
+	n.PktmonHeader.PacketDescriptor.PacketLoggedLength = byteorder.Native.Uint32(data[9:13])
+	n.PktmonHeader.PacketDescriptor.PacketMetadataLength = byteorder.Native.Uint32(data[13:17])
+	n.PktmonHeader.Metadata.PktGroupID = byteorder.Native.Uint64(data[17:25])
+	n.PktmonHeader.Metadata.PktCount = byteorder.Native.Uint16(data[25:27])
+	n.PktmonHeader.Metadata.AppearanceCount = byteorder.Native.Uint16(data[27:29])
+	n.PktmonHeader.Metadata.DirectionName = byteorder.Native.Uint16(data[29:31])
+	n.PktmonHeader.Metadata.PacketType = byteorder.Native.Uint16(data[31:33])
+	n.PktmonHeader.Metadata.ComponentID = byteorder.Native.Uint16(data[33:35])
+	n.PktmonHeader.Metadata.EdgeID = byteorder.Native.Uint16(data[35:37])
+	n.PktmonHeader.Metadata.FilterID = byteorder.Native.Uint16(data[37:39])
+	n.PktmonHeader.Metadata.DropReason = byteorder.Native.Uint32(data[39:43])
+	n.PktmonHeader.Metadata.DropLocation = byteorder.Native.Uint32(data[43:47])
+	n.PktmonHeader.Metadata.ProcNum = byteorder.Native.Uint16(data[47:49])
+	n.PktmonHeader.Metadata.Timestamp = byteorder.Native.Uint64(data[49:57])
 	return nil
 }
 
