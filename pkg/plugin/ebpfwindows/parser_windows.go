@@ -220,8 +220,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 
 	case MessageTypePktmonDrop:
 		slog.Info("Reached pktmon drop event")
-
-		pdn := &PktmonDropNotify{}
+		pdn = &PktmonDropNotify{}
 		if err := DecodePktmonDrop(data, pdn); err != nil {
 			return fmt.Errorf("failed to parse pktmon drop here: %w", err)
 		}
