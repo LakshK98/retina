@@ -27,6 +27,7 @@ import (
 
 const MaxInt = int(^uint(0) >> 1)
 const MessageTypePktmonDrop = 100
+const maxCapLength uint16 = 128
 
 // Parser is a parser for L3/L4 payloads
 type Parser struct {
@@ -206,7 +207,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		dn.Type = monitorAPI.MessageTypeDrop
 		dn.Version = pdn.VersionHeader.Version
 		dn.OrigLen = pdn.PktmonHeader.PacketDescriptor.PacketOriginalLength
-		dn.CapLen = uint16(min(maxCapLength, dn.OrigLen))
+		dn.CapLen = uint16(min(uint32(maxCapLength), uint32(dn.OrigLen)))
 
 		eventSubType = pdn.PktmonHeader.Metadata.DropReason
 		if offset > uint(MaxInt) {
