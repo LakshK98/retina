@@ -135,6 +135,7 @@ void create_pktmon_drop_event(pktmon_notify_t* pktmon_drp_elm)
     pktmon_drp_elm->version_header.type       = PKTMON_NOTIFY_DROP;
     pktmon_drp_elm->version_header.version    = 1;
     pktmon_drp_elm->pktmon_header.metadata.drop_reason = 7;
+    pktmon_drp_elm->pktmon_header.metadata.packet_type = 1;
 }
 
 int
