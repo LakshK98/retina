@@ -166,27 +166,6 @@ struct drop_notify {
 	uint8_t        data[128];
 };
 
-
-// struct pktmon_notify {
-// 	uint8_t		type;
-//     uint16_t    version;
-//     uint8_t		subtype;
-// 	uint16_t		source;
-// 	uint32_t		hash;
-//     uint32_t		len_orig;
-// 	uint16_t		len_cap;
-// 	uint32_t		src_label;
-// 	uint32_t		dst_label;
-// 	uint32_t		dst_id; /* 0 for egress */
-// 	uint16_t		line;
-// 	uint8_t		file;
-// 	int8_t		ext_error;
-// 	uint32_t		ifindex;
-// 	uint8_t        data[128];
-// };
-
-// _Static_assert(sizeof(struct pktmon_notify) == 168, "pktmon_notify struct size must be 168 bytes");
-
 struct metrics_key {
 	uint8_t     reason;	/* 0: forwarded, >0 dropped */
 	uint8_t     dir:2,	/* 1: ingress 2: egress */
@@ -209,19 +188,6 @@ struct metrics_value {
 	uint64_t	count;
 	uint64_t	bytes;
 };
-
-
-
-enum _PKTMON_DIRECTION_TAG
-{
-    PktMonDirTag_Unspecified = 0,
-    PktMonDirTag_In,
-    PktMonDirTag_Out,
-    PktMonDirTag_Rx,
-    PktMonDirTag_Tx,
-    PktMonDirTag_Ingress,
-    PktMonDirTag_Egress
-} PKTMON_DIRECTION_TAG;
 
 typedef struct _netevent_data_header
 {

@@ -21,7 +21,6 @@ const (
 	// dropNotifyV1Len is the amount of packet data provided in a v0/v1 drop notification.
 	dropNotifyV1Len       = 36
 	dropPktmonNotifyV1Len = 57
-	maxCapLength          = 128
 )
 
 var dropNotifyLengthFromVersion = map[uint16]uint{
