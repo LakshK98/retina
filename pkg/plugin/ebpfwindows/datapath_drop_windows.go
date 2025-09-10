@@ -29,7 +29,7 @@ var dropNotifyLengthFromVersion = map[uint16]uint{
 	DropNotifyVersion1: dropNotifyV1Len,
 }
 
-var PktmonDropNotifyLengthFromVersion = map[uint16]uint{
+var pktmonDropNotifyLengthFromVersion = map[uint16]uint{
 	DropNotifyVersion1: dropPktmonNotifyV1Len, // retain backwards compatibility for testing.
 }
 
@@ -104,7 +104,7 @@ func DecodePktmonDrop(data []byte, pdn *PktmonDropNotify) error {
 // DataOffset returns the offset from the beginning of PktmonDropNotify where the
 // notification data begins.
 func (n *PktmonDropNotify) DataOffset() uint {
-	return dropNotifyLengthFromVersion[n.VersionHeader.Version]
+	return pktmonDropNotifyLengthFromVersion[n.VersionHeader.Version]
 }
 
 func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
