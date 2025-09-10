@@ -144,28 +144,6 @@ func (p *Parser) Decode(monitorEvent *observerTypes.MonitorEvent) (*v1.Event, er
 	}
 }
 
-// func (p *Parser) parsePktmonPkt(data []byte, pdn *PktmonDropNotify, decoded *pb.Flow) error {
-
-// 	packetOffset := int(pdn.DataOffset())
-// 	p.packet.Lock()
-// 	defer p.packet.Unlock()
-// 	var err error
-// 	switch pdn.PktmonHeader.Metadata.PacketType {
-// 	case 1:
-// 		slog.Info("Reached Case 1 drop Events")
-// 		err = p.packet.decLayerL2Dev.DecodeLayers(data[packetOffset:], p.packet.Layers[])
-// 	case 3:
-// 		slog.Info("Reached Case 3 drop Events")
-// 		err = p.packet.decLayerL3Dev.IPv6.DecodeLayers(data[packetOffset:], &p.packet.Layers)
-// 	default:
-// 		slog.Info("Cant parse packet of this type %d", pdn.PktmonHeader.Metadata.PacketType)
-
-// 		err = p.packet.decLayerL3Dev.IPv4.DecodeLayers(data[packetOffset:], &p.packet.Layers)
-// 		p.packet.decLayerL3Dev
-// 	}
-// 	return err
-// }
-
 // Decode decodes the data from 'data' into 'decoded'
 func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 	if len(data) == 0 {
@@ -184,13 +162,11 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 
 	switch eventType {
 	case monitorAPI.MessageTypeDrop:
-		slog.Info("Reached ord drop Events")
-
 		dn = &DropNotify{}
 		if err := DecodeDropNotify(data, dn); err != nil {
 			return fmt.Errorf("failed to parse drop: %w", err)
 		}
-		eventSubType = dn.SubType
+		eventSubType = uint32(dn.SubType)
 		offset = dn.DataOffset()
 		if offset > uint(MaxInt) {
 			return fmt.Errorf("%w: %d", errDataOffsetTooLarge, offset)
@@ -219,20 +195,20 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		packetOffset = int(offset)
 
 	case MessageTypePktmonDrop:
-		slog.Info("Reached pktmon drop event")
 		pdn = &PktmonDropNotify{}
 		if err := DecodePktmonDrop(data, pdn); err != nil {
-			return fmt.Errorf("failed to parse pktmon drop here: %w", err)
+			return fmt.Errorf("failed to parse pktmon drop: %w", err)
 		}
 		offset = pdn.DataOffset()
 
+		// Fill relevant fields for dropNotify from pktmonNotify struct
 		dn = &DropNotify{}
-		pdn.ConvertToDropNotify(dn)
 		dn.Type = monitorAPI.MessageTypeDrop
-		slog.Info("Pktmon DropNotify", "PktmonNotify", pdn)
-		slog.Info("Pktmon DropNotify", "DropNotify", dn)
+		dn.Version = pdn.VersionHeader.Version
+		dn.OrigLen = pdn.PktmonHeader.PacketDescriptor.PacketOriginalLength
+		dn.CapLen = uint16(min(maxCapLength, dn.OrigLen))
 
-		eventSubType = dn.SubType
+		eventSubType = pdn.PktmonHeader.Metadata.DropReason
 		if offset > uint(MaxInt) {
 			return fmt.Errorf("%w: %d", errDataOffsetTooLarge, offset)
 		}

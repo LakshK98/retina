@@ -532,7 +532,7 @@ func (v *ValidateWinBpfMetric) Run() error {
 		return err
 	}
 
-	// generate drop events
+	// generate pktmon drop events
 	err = v.generatePktmonDropEvents()
 
 	if err != nil {

@@ -275,23 +275,9 @@ event_writer(xdp_md_t* ctx) {
     }
     else if (flt_evttype == PKTMON_NOTIFY_DROP) {
         struct pktmon_notify* pkt_drp_elm;
-        struct drop_notify* drp_elm;
 
         uint64_t pktmon_size = sizeof(struct pktmon_notify);
         uint64_t drop_size = sizeof(struct drop_notify);
-
-        //Create a Mock Drop Event
-        drp_elm = (struct drop_notify *) bpf_map_lookup_elem(&drp_buffer, &buf_key);
-        if (drp_elm == NULL) {
-            return XDP_PASS;
-        }
-        reason = 130;
-        create_drop_event(drp_elm);
-        memset(drp_elm->data, 0, sizeof(drp_elm->data));
-        memcpy(drp_elm->data, ctx->data, size_to_copy);
-        drp_elm->subtype = 8;
-        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , drp_elm, sizeof(struct drop_notify));
-
 
         //Create a Mock Drop Event
         pkt_drp_elm = (struct pktmon_notify *) bpf_map_lookup_elem(&pktmon_buffer, &buf_key);
@@ -305,21 +291,9 @@ event_writer(xdp_md_t* ctx) {
 
         bpf_printk("PKTMON_NOTIFY_DROP event: reason=%d, size_to_copy=%d \n", reason, size_to_copy);
         bpf_printk("PKTMON_NOTIFY_DROP sizes :  pktmon_struct_size=%llu, drop_struct_size=%llu \n", pktmon_size, drop_size);
-        // Print all raw bytes in pkt_drp_elm (entire struct)
-        uint8_t *raw = (uint8_t *)pkt_drp_elm;
-        for (int i = 0; i < sizeof(struct pktmon_notify); i++) {
-            bpf_printk("pktmon_notify_raw[%d]=0x%02x\n", i, raw[i]);
-        }
-        for (int i = 0; i < size_to_copy && i < sizeof(pkt_drp_elm->data); i++) {
-            bpf_printk("pktmon_drp_elm->data[%d]=0x%02x\n", i, pkt_drp_elm->data[i]);
-        }
+
+        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
         
-        // memcpy(drp_elm->data, ctx->data, size_to_copy);
-        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
-        pkt_drp_elm->pktmon_header.metadata.drop_reason = 0x10000000;
-        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
-
-
         // Create Windows specific drop event with hardcoded reason code
         {
             struct metrics_value *win_entry, win_new_entry = {};

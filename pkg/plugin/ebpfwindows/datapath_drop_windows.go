@@ -30,18 +30,19 @@ var dropNotifyLengthFromVersion = map[uint16]uint{
 }
 
 var pktmonDropNotifyLengthFromVersion = map[uint16]uint{
-	DropNotifyVersion1: dropPktmonNotifyV1Len, // retain backwards compatibility for testing.
+	DropNotifyVersion1: dropPktmonNotifyV1Len,
 }
 
 var (
-	errUnexpectedDropNotifyLength = errors.New("unexpected DropNotify data length")
-	errInvalidDropNotifyVersion   = errors.New("invalid DropNotify version")
+	errUnexpectedDropNotifyLength     = errors.New("unexpected DropNotify data length")
+	errInvalidDropNotifyVersion       = errors.New("invalid DropNotify version")
+	errInvalidPktmonDropNotifyVersion = errors.New("invalid Pktmon DropNotify version")
 )
 
 // DropNotify is the message format of a drop notification in the BPF ring buffer
 type DropNotify struct {
 	Type     uint8
-	SubType  uint32
+	SubType  uint8
 	Source   uint16
 	Hash     uint32
 	OrigLen  uint32
@@ -115,10 +116,7 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 
 	// Check against max version.
 	if version > DropNotifyVersion1 {
-		return fmt.Errorf("%w: Unrecognized pktmon drop event version %d\nRaw data bytes: %v\nData size: %d\nType: %d\n",
-			errInvalidDropNotifyVersion, version,
-			data,
-			len(data))
+		return fmt.Errorf("%w: Unrecognized drop event version %d", errInvalidPktmonDropNotifyVersion, version)
 	}
 
 	// Decode logic for version >= v0/v1.
@@ -143,14 +141,6 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 	return nil
 }
 
-func (n *PktmonDropNotify) ConvertToDropNotify(dn *DropNotify) {
-	dn.Type = 1
-	dn.SubType = n.PktmonHeader.Metadata.DropReason
-	dn.OrigLen = n.PktmonHeader.PacketDescriptor.PacketOriginalLength
-	dn.CapLen = uint16(min(maxCapLength, dn.OrigLen))
-	dn.Version = n.VersionHeader.Version
-}
-
 // DecodeDropNotify will decode 'data' into the provided DropNotify structure
 func DecodeDropNotify(data []byte, dn *DropNotify) error {
 	return dn.decodeDropNotify(data)
@@ -170,7 +160,7 @@ func (n *DropNotify) decodeDropNotify(data []byte) error {
 
 	// Decode logic for version >= v0/v1.
 	n.Type = data[0]
-	n.SubType = uint32(data[1])
+	n.SubType = data[1]
 	n.Source = byteorder.Native.Uint16(data[2:4])
 	n.Hash = byteorder.Native.Uint32(data[4:8])
 	n.OrigLen = byteorder.Native.Uint32(data[8:12])
