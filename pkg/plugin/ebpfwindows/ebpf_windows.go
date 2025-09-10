@@ -260,7 +260,6 @@ func (p *Plugin) handleTraceEvent(data unsafe.Pointer, size uint32) error {
 	eventType := perfData[0]
 	switch eventType {
 	case monitorAPI.MessageTypeDrop:
-		slog.Info("Reached ord drop Events1")
 		if size <= uint32(unsafe.Sizeof(DropNotify{})) {
 			return fmt.Errorf("%w: %d", errInvalidDropNotifySize, size)
 		}
@@ -309,8 +308,7 @@ func (p *Plugin) handleTraceEvent(data unsafe.Pointer, size uint32) error {
 		utils.AddRetinaMetadata(fl, meta)
 		p.enricher.Write(e)
 
-	case 100:
-		slog.Info("Reached pktmon drop Events")
+	case MessageTypePktmonDrop:
 		if size <= uint32(unsafe.Sizeof(PktmonDropNotify{})) {
 			return fmt.Errorf("%w: %d", errInvalidDropNotifySize, size)
 		}
@@ -321,7 +319,7 @@ func (p *Plugin) handleTraceEvent(data unsafe.Pointer, size uint32) error {
 			},
 		})
 		if err != nil {
-			return fmt.Errorf("could not convert droPktmonDropNotify pnotify event to flow: %w", err)
+			return fmt.Errorf("could not convert pktmon dropnotify event to flow: %w", err)
 		}
 		meta := &utils.RetinaMetadata{}
 		utils.AddPacketSize(meta, size-uint32(unsafe.Sizeof(DropNotify{})))
