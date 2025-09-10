@@ -267,13 +267,16 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 			case 1:
 				err = p.packet.decLayerL2Dev.DecodeLayers(data[packetOffset:], &p.packet.Layers)
 			case 3:
-				if (data[packetOffset] >> 4) == 0x4 {
+				switch data[packetOffset] >> 4 {
+				case 0x4:
+					err = p.packet.decLayerL3Dev.IPv4.DecodeLayers(data[packetOffset:], &p.packet.Layers)
+				case 0x6:
 					err = p.packet.decLayerL3Dev.IPv6.DecodeLayers(data[packetOffset:], &p.packet.Layers)
-				} else {
-					return fmt.Errorf("decode layers failed for unsupported IP packet type starting with %d", data[packetOffset])
+				default:
+					return fmt.Errorf("decode layers failed for unsupported IP packet type starting with %d, data: %v", data[packetOffset], data[packetOffset:])
 				}
 			default:
-				return fmt.Errorf("decode layers failed for unsupported  packet type %d", pdn.PktmonHeader.Metadata.PacketType)
+				return fmt.Errorf("decode layers failed for unsupported packet type %d, data: %v", pdn.PktmonHeader.Metadata.PacketType, data[packetOffset:])
 			}
 		} else {
 			switch {
