@@ -204,10 +204,6 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 
 		// Fill relevant fields for dropNotify from pktmonNotify struct
 		dn = &DropNotify{}
-		dn.Type = monitorAPI.MessageTypeDrop
-		dn.Version = pdn.VersionHeader.Version
-		dn.OrigLen = pdn.PktmonHeader.PacketDescriptor.PacketOriginalLength
-		dn.CapLen = uint16(min(uint32(maxCapLength), uint32(dn.OrigLen)))
 
 		eventSubType = pdn.PktmonHeader.Metadata.DropReason
 		if offset > uint(MaxInt) {
@@ -230,16 +226,9 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 	// https://github.com/google/gopacket/issues/846
 	// TODO: reconsider this check if the issue is fixed upstream
 	if len(data[packetOffset:]) > 0 {
-		var isL3Device, isIPv6 bool
-		if (tn != nil && tn.IsL3Device()) || (dn != nil && dn.IsL3Device()) {
-			isL3Device = true
-		}
-		if tn != nil && tn.IsIPv6() || (dn != nil && dn.IsIPv6()) {
-			isIPv6 = true
-		}
 
 		var err error
-		if eventType == MessageTypePktmonDrop {
+		if pdn != nil {
 			switch pdn.PktmonHeader.Metadata.PacketType {
 			case 1:
 				err = p.packet.decLayerL2Dev.DecodeLayers(data[packetOffset:], &p.packet.Layers)
@@ -256,6 +245,13 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 				return fmt.Errorf("decode layers failed for unsupported packet type %d, data: %v", pdn.PktmonHeader.Metadata.PacketType, data[packetOffset:])
 			}
 		} else {
+			var isL3Device, isIPv6 bool
+			if (tn != nil && tn.IsL3Device()) || (dn != nil && dn.IsL3Device()) {
+				isL3Device = true
+			}
+			if tn != nil && tn.IsIPv6() || (dn != nil && dn.IsIPv6()) {
+				isIPv6 = true
+			}
 			switch {
 			case !isL3Device:
 				err = p.packet.decLayerL2Dev.DecodeLayers(data[packetOffset:], &p.packet.Layers)
@@ -307,10 +303,10 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 	srcEndpoint := p.epResolver.ResolveEndpoint(srcIP, srcLabelID, datapathContext)
 	dstEndpoint := p.epResolver.ResolveEndpoint(decodedpacket.DestinationIP, dstLabelID, datapathContext)
 
-	decoded.Verdict = decodeVerdict(dn, tn)
+	decoded.Verdict = decodeVerdict(dn, tn, pdn)
 	decoded.AuthType = authType
 	//nolint:staticcheck // SA1019 - temporary assignment for backward compatibility
-	decoded.DropReason = decodeDropReason(dn)
+	decoded.DropReason = decodeDropReason(dn, pdn)
 	//nolint:staticcheck // SA1019 - temporary assignment for backward compatibility
 	dropReason := decoded.GetDropReason()
 	if dropReason > math.MaxInt32 {
@@ -398,9 +394,9 @@ func decodeLayers(packet *packet) *DecodedPacket {
 	}
 }
 
-func decodeVerdict(dn *DropNotify, tn *TraceNotify) pb.Verdict {
+func decodeVerdict(dn *DropNotify, tn *TraceNotify, pdn *PktmonDropNotify) pb.Verdict {
 	switch {
-	case dn != nil:
+	case dn != nil || pdn != nil:
 		return pb.Verdict_DROPPED
 	case tn != nil:
 		return pb.Verdict_FORWARDED
@@ -408,9 +404,12 @@ func decodeVerdict(dn *DropNotify, tn *TraceNotify) pb.Verdict {
 	return pb.Verdict_VERDICT_UNKNOWN
 }
 
-func decodeDropReason(dn *DropNotify) uint32 {
+func decodeDropReason(dn *DropNotify, pdn *PktmonDropNotify) uint32 {
 	if dn != nil {
 		return uint32(dn.SubType)
+	}
+	if pdn != nil {
+		return uint32(pdn.PktmonHeader.Metadata.DropReason)
 	}
 	return 0
 }
