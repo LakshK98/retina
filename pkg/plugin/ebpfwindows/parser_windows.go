@@ -27,7 +27,24 @@ import (
 
 const MaxInt = int(^uint(0) >> 1)
 const MessageTypePktmonDrop = 100
-const maxCapLength uint16 = 128
+
+type PktmonPacketType uint8
+
+// pktmon packet types
+const (
+	PktMonPayloadUnknown PktmonPacketType = iota
+	PktMonPayloadEthernet
+	PktMonPayloadWiFi
+	PktMonPayloadIP
+	PktMonPayloadHTTP
+	PktMonPayloadTCP
+	PktMonPayloadUDP
+	PktMonPayloadARP
+	PktMonPayloadICMP
+	PktMonPayloadESP
+	PktMonPayloadAH
+	PktMonPayloadL4Payload
+)
 
 // Parser is a parser for L3/L4 payloads
 type Parser struct {
@@ -205,7 +222,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		// Fill relevant fields for dropNotify from pktmonNotify struct
 		dn = &DropNotify{}
 
-		eventSubType = pdn.PktmonHeader.Metadata.DropReason
+		eventSubType = pdn.PktmonHeader.Metadata.DropReason | (1 << 31)
 		if offset > uint(MaxInt) {
 			return fmt.Errorf("%w: %d", errDataOffsetTooLarge, offset)
 		}
@@ -230,9 +247,9 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		var err error
 		if pdn != nil {
 			switch pdn.PktmonHeader.Metadata.PacketType {
-			case 1:
+			case uint16(PktMonPayloadEthernet):
 				err = p.packet.decLayerL2Dev.DecodeLayers(data[packetOffset:], &p.packet.Layers)
-			case 3:
+			case uint16(PktMonPayloadIP):
 				switch data[packetOffset] >> 4 {
 				case 0x4:
 					err = p.packet.decLayerL3Dev.IPv4.DecodeLayers(data[packetOffset:], &p.packet.Layers)
