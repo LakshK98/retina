@@ -813,7 +813,7 @@ func TestHandleTraceEventWithEthPacket_PktmonDropNotify(t *testing.T) {
 	// version 1
 	pdn[2] = 0x01
 	pdn[3] = 0x00
-	// PacketType 1
+	// PacketType 1 (PktMonPayloadEthernet)
 	pdn[31] = 0x01
 	pdn[32] = 0x00
 
@@ -859,7 +859,7 @@ func TestHandleTraceEventWithIpPacket_PktmonDropNotify(t *testing.T) {
 				t.Errorf("expected event type %v, got %v", MessageTypePktmonDrop, eventType)
 			}
 
-			var testDropReason int32 = 2
+			var testDropReason int32 = -2147483641
 			eventSubType := fl.GetEventType().GetSubType()
 			if eventSubType != testDropReason {
 				t.Errorf("expected event type %v, got %v", testDropReason, eventSubType)
@@ -901,12 +901,12 @@ func TestHandleTraceEventWithIpPacket_PktmonDropNotify(t *testing.T) {
 	// version 1
 	pdn[2] = 0x01
 	pdn[3] = 0x00
-	// PacketType 3
+	// PacketType 3 (PktMonPayloadIP)
 	pdn[31] = 0x03
 	pdn[32] = 0x00
 
 	// DropReason 0x00000002
-	pdn[39] = 0x02
+	pdn[39] = 0x07
 	pdn[40] = 0x00
 	pdn[41] = 0x00
 	pdn[42] = 0x00
