@@ -31,10 +31,10 @@ enum DropReason {
     Drop_NotReady                     = 4;
     Drop_Disconnected                 = 5;
     Drop_NotAccepted                  = 6;
-    Drop_Busy                         = 2147483655;
+    Drop_Busy                         = 1007;
     Drop_Filtered                     = 8;
     Drop_FilteredVLAN                 = 9;
-    Drop_UnauthorizedVLAN             = 2147483658;
+    Drop_UnauthorizedVLAN             = 1010;
     Drop_UnauthorizedMAC              = 11;
     Drop_FailedSecurityPolicy         = 12;
     Drop_FailedPvlanSetting           = 13;

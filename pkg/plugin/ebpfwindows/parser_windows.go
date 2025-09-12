@@ -222,7 +222,7 @@ func (p *Parser) decode(data []byte, decoded *pb.Flow) error {
 		// Fill relevant fields for dropNotify from pktmonNotify struct
 		dn = &DropNotify{}
 
-		eventSubType = pdn.PktmonHeader.Metadata.DropReason | (1 << 31)
+		eventSubType = pdn.PktmonHeader.Metadata.DropReason + 1000
 		if offset > uint(MaxInt) {
 			return fmt.Errorf("%w: %d", errDataOffsetTooLarge, offset)
 		}
