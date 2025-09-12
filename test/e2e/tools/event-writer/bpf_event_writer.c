@@ -293,6 +293,8 @@ event_writer(xdp_md_t* ctx) {
         bpf_printk("PKTMON_NOTIFY_DROP sizes :  pktmon_struct_size=%llu, drop_struct_size=%llu \n", pktmon_size, drop_size);
 
         bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
+        pkt_drp_elm->subtype = 10;
+        bpf_perf_event_output(ctx, &cilium_events, EBPF_MAP_FLAG_CURRENT_CPU , pkt_drp_elm, sizeof(struct pktmon_notify));
         
         // Create Windows specific drop event with hardcoded reason code
         {
