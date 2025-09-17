@@ -12,10 +12,10 @@ FROM mcr.microsoft.com/cbl-mariner/base/core@sha256:8deab931d4af66264253cce66471
 FROM mcr.microsoft.com/cbl-mariner/distroless/minimal@sha256:0b09ee9e988e338f86432484c980c9c334d2b35b3bec6ce14298b754ecb6460b AS mariner-distroless
 
 # mcr.microsoft.com/windows/servercore:ltsc2019
-FROM mcr.microsoft.com/windows/servercore AS ltsc2019
+FROM mcr.microsoft.com/windows/servercore:ltsc2019 AS ltsc2019
 
 # mcr.microsoft.com/windows/servercore:ltsc2022
-FROM mcr.microsoft.com/windows/servercore AS ltsc2022
+FROM mcr.microsoft.com/windows/servercore:ltsc2022 AS ltsc2022
 
 
 # build stages
