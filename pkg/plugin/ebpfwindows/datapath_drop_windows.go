@@ -113,6 +113,8 @@ func (n *PktmonDropNotify) decodePktmonDrop(data []byte) error {
 	}
 	version := byteorder.Native.Uint16(data[2:4])
 	fmt.Printf("PktmonDropNotify raw data: %x\n", data)
+	dropReason := byteorder.Native.Uint32(data[39:43])
+	fmt.Printf("PktmonDropNotify DropReason: %d\n", dropReason)
 	// Check against max version.
 	if version > DropNotifyVersion1 {
 		return fmt.Errorf("%w: Unrecognized drop event version %d", errInvalidPktmonDropNotifyVersion, version)
