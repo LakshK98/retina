@@ -78,7 +78,7 @@
         $(XdpPackagePath)bin\$(Platform)\xdpbpfexport.exe
         clang -g -target bpf -O2 -Werror -I$(EbpfPackagePath)include -I$(XdpPackagePath)include -c bpf_event_writer.c -o $(Platform)\$(Configuration)\bpf_event_writer.o
         pushd $(OutDir)
-        powershell -NonInteractive -ExecutionPolicy Unrestricted $(EbpfPackagePath)bin\Convert-BpfToNative.ps1 -FileName bpf_event_writer -IncludeDir $(EbpfPackagePath)include -Platform $(Platform) -Packages $(SolutionDir)packages -Configuration $(Configuration) -KernelMode $true
+        powershell -NonInteractive -ExecutionPolicy Unrestricted $(EbpfPackagePath)bin\Convert-BpfToNative.ps1 -FileName bpf_event_writer -IncludeDir $(EbpfPackagePath)include -Platform $(Platform) -Configuration $(Configuration) -KernelMode $true
         popd
       </Command>
     </CustomBuild>
