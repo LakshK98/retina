@@ -406,10 +406,10 @@ Function Install-eBPF
 
       Write-Host 'Installing extended Berkley Packet Filter for Windows'
       # Download eBPF-for-Windows.
-      $packageEbpfUrl  = "https://github.com/microsoft/ebpf-for-windows/releases/download/Release-v0.21.1/ebpf-for-windows.x64.0.21.1.msi"
-      Invoke-WebRequest -Uri $packageEbpfUrl -OutFile "$LocalPath\ebpf-for-windows.x64.0.21.1.msi"
+      $packageEbpfUrl  = "https://github.com/microsoft/ebpf-for-windows/releases/download/Release-v1.0.0-rc2/ebpf-for-windows.x64.1.0.0-rc2.msi"
+      Invoke-WebRequest -Uri $packageEbpfUrl -OutFile "$LocalPath\ebpf-for-windows.x64.1.0.0-rc2.msi"
 
-      Start-Process -FilePath "$($env:WinDir)\System32\MSIExec.exe" -ArgumentList @("/i", "$LocalPath\ebpf-for-windows.x64.0.21.1.msi", "/qn", "INSTALLFOLDER=`"$($env:ProgramFiles)\ebpf-for-windows`"", "ADDLOCAL=eBPF_Runtime_Components") -PassThru | Wait-Process
+      Start-Process -FilePath "$($env:WinDir)\System32\MSIExec.exe" -ArgumentList @("/i", "$LocalPath\ebpf-for-windows.x64.1.0.0-rc2.msi", "/qn", "INSTALLFOLDER=`"$($env:ProgramFiles)\ebpf-for-windows`"", "ADDLOCAL=eBPF_Runtime_Components") -PassThru | Wait-Process
       If(-Not (Assert-SoftwareInstalled -ServiceName:'eBPFCore' -Silent) -Or
          -Not (Assert-SoftwareInstalled -ServiceName:'NetEbpfExt' -Silent))
       {
@@ -472,7 +472,7 @@ Function Install-XDP
       Write-Host 'Installing eXpress Data Path for Windows'
       CertUtil.exe -addstore Root "$LocalPath\xdp.cer"
       CertUtil.exe -addstore TrustedPublisher "$LocalPath\xdp.cer"
-      Invoke-WebRequest -Uri "https://github.com/microsoft/xdp-for-windows/releases/download/v1.2.0-prerelease-793dc2a0/xdp-for-windows.x64.1.2.0-prerelease-793dc2a0.msi" -OutFile "$LocalPath\xdp-for-windows.msi"
+      Invoke-WebRequest -Uri "https://github.com/microsoft/xdp-for-windows/releases/download/1.2.3-prerelease-d9a89cca/xdp-for-windows.x64.1.2.3-prerelease-d9a89cca.msi" -OutFile "$LocalPath\xdp-for-windows.msi"
       $certFileName = 'xdp.cer'
       Get-AuthenticodeSignature "$LocalPath\xdp-for-windows.msi" | Select-Object -ExpandProperty SignerCertificate | Export-Certificate -Type CERT -FilePath $certFileName
       Import-Certificate -FilePath $certFileName -CertStoreLocation 'cert:\localmachine\root'
@@ -639,7 +639,7 @@ Function Uninstall-eBPF
             }
          }
 
-         Start-Process -FilePath:"$($env:WinDir)\System32\MSIExec.exe" -ArgumentList @("/x $($LocalPath)\ebpf-for-windows.x64.0.21.1.msi", '/qn') -PassThru | Wait-Process
+         Start-Process -FilePath:"$($env:WinDir)\System32\MSIExec.exe" -ArgumentList @("/x $($LocalPath)\ebpf-for-windows.x64.1.0.0-rc2.msi", '/qn') -PassThru | Wait-Process
       }
 
       If((Assert-SoftwareInstalled -ServiceName:'eBPFCore' -Silent) -or
