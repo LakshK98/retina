@@ -17,7 +17,7 @@ permissions:
 
 env:
   EVENT_WRITER_PATH: "${{ github.workspace }}/test/e2e/tools/event-writer/"
-  EBPF_VERSION: "1.0.0-rc2"
+  EBPF_VERSION: "1.0.0-rc1"
 
 jobs:
   retina-win-e2e-bpf-images:
