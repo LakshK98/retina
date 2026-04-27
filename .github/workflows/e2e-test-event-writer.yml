@@ -17,6 +17,7 @@ permissions:
 
 env:
   EVENT_WRITER_PATH: "${{ github.workspace }}/test/e2e/tools/event-writer/"
+  EBPF_VERSION: "1.0.0-rc2"
 
 jobs:
   retina-win-e2e-bpf-images:
@@ -80,7 +81,7 @@ jobs:
         run: |
           .\export_program_info.exe --clear
           .\export_program_info.exe
-        working-directory: ${{ env.EVENT_WRITER_PATH }}\packages\eBPF-for-Windows.x64.1.0.0-rc2\build\native\bin
+        working-directory: ${{ env.EVENT_WRITER_PATH }}\packages\eBPF-for-Windows.x64.${{ env.EBPF_VERSION }}\build\native\bin
 
       - name: Build Event-Writer
         shell: cmd
