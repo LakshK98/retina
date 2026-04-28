@@ -78,6 +78,7 @@
     <CustomBuild Include="bpf_event_writer.c">
       <Outputs>$(Platform)\$(Configuration)\bpf_event_writer.sys</Outputs>
       <Command>
+        set PATH=$(EbpfPackagePath)bin;%PATH%
         $(XdpPackagePath)bin\$(Platform)\xdpbpfexport.exe --clear
         $(XdpPackagePath)bin\$(Platform)\xdpbpfexport.exe
         clang -g -target bpf -O2 -Werror -I$(EbpfPackagePath)include -I$(XdpPackagePath)include -c bpf_event_writer.c -o $(Platform)\$(Configuration)\bpf_event_writer.o
