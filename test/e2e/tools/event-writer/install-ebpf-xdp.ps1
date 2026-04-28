@@ -462,28 +462,37 @@ Function Install-XDP
 
    Try
    {
-      If(Assert-SoftwareInstalled -SoftwareName:'XDP for Windows' -Silent)
+      If(Assert-SoftwareInstalled -ServiceName:'XDP' -Silent)
       {
          Write-Host 'XDP for Windows is already installed'
          return $isSuccess
       }
 
-      # Download XDP-for-Windows.
+      # Download and extract the XDP runtime NuGet package.
       Write-Host 'Installing eXpress Data Path for Windows'
-      CertUtil.exe -addstore Root "$LocalPath\xdp.cer"
-      CertUtil.exe -addstore TrustedPublisher "$LocalPath\xdp.cer"
-      Invoke-WebRequest -Uri "https://github.com/microsoft/xdp-for-windows/releases/download/1.2.3-prerelease-d9a89cca/xdp-for-windows.x64.1.2.3-prerelease-d9a89cca.msi" -OutFile "$LocalPath\xdp-for-windows.msi"
-      $certFileName = 'xdp.cer'
-      Get-AuthenticodeSignature "$LocalPath\xdp-for-windows.msi" | Select-Object -ExpandProperty SignerCertificate | Export-Certificate -Type CERT -FilePath $certFileName
-      Import-Certificate -FilePath $certFileName -CertStoreLocation 'cert:\localmachine\root'
-      Import-Certificate -FilePath $certFileName -CertStoreLocation 'cert:\localmachine\trustedpublisher'
-      Start-Process -FilePath:"$($env:WinDir)\System32\MSIExec.exe" -ArgumentList @("/i $LocalPath\xdp-for-windows.msi", '/qn') -PassThru | Wait-Process
-      sc.exe query xdp
+      $xdpRuntimeVersion = "1.3.0"
+      $xdpNupkgUrl = "https://www.nuget.org/api/v2/package/Microsoft.XDP-for-Windows.Runtime.x64/$xdpRuntimeVersion"
+      $xdpNupkgPath = "$LocalPath\Microsoft.XDP-for-Windows.Runtime.x64.$xdpRuntimeVersion.nupkg"
+      $xdpExtractPath = "$LocalPath\xdp-runtime"
+
+      Invoke-WebRequest -Uri $xdpNupkgUrl -OutFile $xdpNupkgPath
+      Expand-Archive -Path $xdpNupkgPath -DestinationPath $xdpExtractPath -Force
+
+      # Install XDP using xdp-setup.ps1 from the runtime package
+      $xdpSetupScript = Get-ChildItem -Path $xdpExtractPath -Recurse -Filter "xdp-setup.ps1" | Select-Object -First 1
+      If($null -eq $xdpSetupScript) {
+         Write-Error -Message:"xdp-setup.ps1 not found in the runtime package"
+         Throw
+      }
+
+      & $xdpSetupScript.FullName -Install xdp
+      & $xdpSetupScript.FullName -Install xdpebpf
+
       reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\xdp\Parameters" /v XdpEbpfEnabled /d 1 /t REG_DWORD /f
       net.exe stop xdp
       net.exe start xdp
 
-      If(-Not (Assert-SoftwareInstalled -SoftwareName:'XDP for Windows' -Silent)) {
+      If(-Not (Assert-SoftwareInstalled -ServiceName:'XDP' -Silent)) {
          Throw
       }
 
@@ -726,15 +735,16 @@ Function Uninstall-XDP
             $state = Get-Service -Name:'XDP'
          }
 
-         $regValue = New-ItemProperty -Path:'HKLM:\SYSTEM\CurrentControlSet\Services\xdp\Parameters' -Name:'xdpEbpfEnabled' -PropertyType:'DWORD' -Value:0 -Force
-         If($regValue.xdpEbpfEnabled -IEQ 0)
-         {
-            Start-Process -FilePath:"$($env:WinDir)\System32\MSIExec.exe" -ArgumentList @("/x $($LocalPath)\xdp-for-windows.msi", '/qn') -PassThru | Wait-Process
+         # Uninstall using xdp-setup.ps1 from the extracted runtime package
+         $xdpExtractPath = "$LocalPath\xdp-runtime"
+         $xdpSetupScript = Get-ChildItem -Path $xdpExtractPath -Recurse -Filter "xdp-setup.ps1" -ErrorAction SilentlyContinue | Select-Object -First 1
+         If($null -ne $xdpSetupScript) {
+            & $xdpSetupScript.FullName -Uninstall xdpebpf
+            & $xdpSetupScript.FullName -Uninstall xdp
          }
       }
 
-      If((Assert-SoftwareInstalled -ServiceName:'XDP' -Silent) -or
-         (Assert-SoftwareInstalled -SoftwareName:'XDP for Windows' -Silent))
+      If((Assert-SoftwareInstalled -ServiceName:'XDP' -Silent))
       {
          Write-Error -Message:"XDP for Windows is still installed"
 
