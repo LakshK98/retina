@@ -84,14 +84,6 @@ jobs:
           .\export_program_info.exe
         working-directory: ${{ env.EVENT_WRITER_PATH }}\packages\eBPF-for-Windows.x64.${{ env.EBPF_VERSION }}\build\native\bin
 
-      - name: Configure XDP eBPF store
-        shell: cmd
-        run: |
-          set PATH=${{ env.EVENT_WRITER_PATH }}\packages\eBPF-for-Windows.x64.${{ env.EBPF_VERSION }}\build\native\bin;%PATH%
-          .\xdpbpfexport.exe --clear
-          .\xdpbpfexport.exe
-        working-directory: ${{ env.EVENT_WRITER_PATH }}\packages\Microsoft.XDP-for-Windows.Sdk.${{ env.XDP_SDK_VERSION }}\build\native\bin\x64
-
       - name: Build Event-Writer
         shell: cmd
         run: |
