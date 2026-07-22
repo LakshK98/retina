@@ -10,7 +10,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net"
 	"testing"
 	"time"
@@ -397,7 +396,7 @@ func TestHandleTraceEvent_InvalidSizeZero(t *testing.T) {
 // TestMetricsMapIterateCallback_DropEgress tests the behavior of the metricsMapIterateCallback function
 // when a drop event is received for egress traffic.
 func TestMetricsMapIterateCallback_DropEgress(t *testing.T) {
-	metrics.InitializeMetrics(slog.Default())
+	metrics.InitializeMetrics()
 	p := &Plugin{
 		cfg: &kcfg.Config{
 			MetricsInterval: 100 * time.Second,
@@ -426,7 +425,7 @@ func TestMetricsMapIterateCallback_DropEgress(t *testing.T) {
 // TestMetricsMapIterateCallback_DropIngress tests the behavior of the metricsMapIterateCallback function
 // when a drop event is received for ingress traffic.
 func TestMetricsMapIterateCallback_DropIngress(t *testing.T) {
-	metrics.InitializeMetrics(slog.Default())
+	metrics.InitializeMetrics()
 	p := &Plugin{
 		cfg: &kcfg.Config{
 			MetricsInterval: 100 * time.Second,
@@ -455,7 +454,7 @@ func TestMetricsMapIterateCallback_DropIngress(t *testing.T) {
 // TestMetricsMapIterateCallback_ForwardEgress tests the behavior of the metricsMapIterateCallback function
 // when a forward event is received for egress traffic.
 func TestMetricsMapIterateCallback_ForwardEgress(t *testing.T) {
-	metrics.InitializeMetrics(slog.Default())
+	metrics.InitializeMetrics()
 	p := &Plugin{
 		cfg: &kcfg.Config{
 			MetricsInterval: 100 * time.Second,
@@ -484,7 +483,7 @@ func TestMetricsMapIterateCallback_ForwardEgress(t *testing.T) {
 // TestMetricsMapIterateCallback_ForwardIngress tests the behavior of the metricsMapIterateCallback function
 // when a forward event is received for ingress traffic.
 func TestMetricsMapIterateCallback_ForwardIngress(t *testing.T) {
-	metrics.InitializeMetrics(slog.Default())
+	metrics.InitializeMetrics()
 	p := &Plugin{
 		cfg: &kcfg.Config{
 			MetricsInterval: 100 * time.Second,
@@ -520,7 +519,7 @@ func TestMetricsMapIterateCallback_NilKey(t *testing.T) {
 		}
 	}()
 
-	metrics.InitializeMetrics(slog.Default())
+	metrics.InitializeMetrics()
 	p := &Plugin{
 		cfg: &kcfg.Config{
 			MetricsInterval: 100 * time.Second,
@@ -542,7 +541,7 @@ func TestMetricsMapIterateCallback_NilValue(t *testing.T) {
 		}
 	}()
 
-	metrics.InitializeMetrics(slog.Default())
+	metrics.InitializeMetrics()
 	p := &Plugin{
 		cfg: &kcfg.Config{
 			MetricsInterval: 100 * time.Second,
