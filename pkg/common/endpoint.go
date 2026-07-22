@@ -160,7 +160,7 @@ func (ep *RetinaEndpoint) PrimaryIP() (string, error) {
 		}
 	}
 
-	return "", errors.Wrapf(ErrNoPrimaryIPFoundEndpoint, ep.Key())
+	return "", errors.Wrapf(ErrNoPrimaryIPFoundEndpoint, "endpoint: %s", ep.Key())
 }
 
 func (ep *RetinaEndpoint) PrimaryNetIP() (net.IP, error) {
@@ -174,7 +174,7 @@ func (ep *RetinaEndpoint) PrimaryNetIP() (net.IP, error) {
 		}
 	}
 
-	return nil, errors.Wrapf(ErrNoPrimaryIPFoundEndpoint, ep.Key())
+	return nil, errors.Wrapf(ErrNoPrimaryIPFoundEndpoint, "endpoint: %s", ep.Key())
 }
 
 func (o *OwnerReference) DeepCopy() *OwnerReference {
