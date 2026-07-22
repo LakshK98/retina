@@ -5,6 +5,7 @@ package retinaendpoint
 
 import (
 	"context"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -40,6 +41,10 @@ func TestAPIs(t *testing.T) {
 
 	if testing.Short() {
 		t.Skip("skipping more involved tests with -short")
+	}
+
+	if _, err := exec.LookPath("etcd"); err != nil {
+		t.Skip("skipping envtest suite: etcd not found in PATH or KUBEBUILDER_ASSETS")
 	}
 
 	RunSpecs(t, "Capture Controller Suite")

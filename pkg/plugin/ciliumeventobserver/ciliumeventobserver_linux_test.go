@@ -46,19 +46,20 @@ func TestStartError(t *testing.T) {
 
 func TestStart(t *testing.T) {
 	ctxWithCancel, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	_, _ = log.SetupZapLogger(log.GetDefaultLogOpts())
 
 	cfg := &config.Config{
 		EnablePodLevel: true,
 	}
 	cil := New(cfg)
-	exChan := make(chan *v1.Event)
+	exChan := make(chan *v1.Event, 1)
 	_ = cil.SetupChannel(exChan)
 	_ = cil.Init()
 	md := NewMockDialer(false)
 	cil.(*ciliumeventobserver).d = md
 	cil.(*ciliumeventobserver).connection = md.reader
+	cil.(*ciliumeventobserver).retryDelay = 1 * time.Millisecond
+	cil.(*ciliumeventobserver).maxAttempts = 1
 
 	go cil.Start(ctxWithCancel) //nolint:errcheck // do not need for test
 	pl := getPayload()
@@ -66,6 +67,11 @@ func TestStart(t *testing.T) {
 	_, _ = md.writer.Write(msg)
 	event := <-exChan
 	assert.Assert(t, event != nil)
+
+	// Clean up: cancel context then close pipe to unblock monitorLoop.
+	cancel()
+	md.reader.Close()
+	md.writer.Close()
 }
 
 func TestMonitorLoop(t *testing.T) {
