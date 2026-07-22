@@ -122,6 +122,7 @@ jobs:
           path: output/windows_amd64/
 
       - name: Set lowercase repo name
+        shell: bash
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
       - name: Az CLI login
